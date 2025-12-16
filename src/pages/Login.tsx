@@ -1,22 +1,62 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Briefcase, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn, user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Auth logic will be added when Supabase is connected
-    setTimeout(() => setIsLoading(false), 1000);
+
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      let message = "Error al iniciar sesión";
+      if (error.message.includes("Invalid login credentials")) {
+        message = "Credenciales inválidas. Verifica tu email y contraseña.";
+      } else if (error.message.includes("Email not confirmed")) {
+        message = "Por favor confirma tu email antes de iniciar sesión.";
+      }
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    toast({
+      title: "¡Bienvenido!",
+      description: "Has iniciado sesión correctamente.",
+    });
+    navigate("/app");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-hero flex">
@@ -102,7 +142,14 @@ export default function Login() {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Iniciando sesión...
+                  </>
+                ) : (
+                  "Iniciar sesión"
+                )}
               </Button>
             </form>
 

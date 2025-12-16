@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
@@ -45,6 +47,19 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Sesión cerrada",
+      description: "Has cerrado sesión correctamente.",
+    });
+    navigate("/");
+  };
+
+  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Usuario";
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,7 +170,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <User className="w-4 h-4 text-primary" />
                     </div>
-                    <span className="hidden md:inline text-sm">Usuario</span>
+                    <span className="hidden md:inline text-sm">{displayName}</span>
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -167,7 +182,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <Link to="/app/configuracion">Configuración</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem 
+                    className="text-destructive cursor-pointer"
+                    onClick={handleSignOut}
+                  >
                     <LogOut className="w-4 h-4 mr-2" />
                     Cerrar sesión
                   </DropdownMenuItem>
