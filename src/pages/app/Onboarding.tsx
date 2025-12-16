@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Briefcase,
   ArrowRight,
@@ -23,8 +22,12 @@ import {
   Target,
   DollarSign,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/hooks/useProfile";
+import { useResumes } from "@/hooks/useResumes";
+import type { Enums } from "@/integrations/supabase/types";
 
 const steps = [
   { id: 1, title: "Ubicación", icon: Globe },
@@ -65,12 +68,15 @@ const seniorities = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const { completeOnboarding } = useProfile();
+  const { createResume } = useResumes();
   const [currentStep, setCurrentStep] = useState(1);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     country: "",
     roleTarget: "",
     industries: [] as string[],
-    seniority: "",
+    seniority: "" as Enums<'seniority_level'> | "",
     skills: "",
     englishLevel: "",
     salaryMin: "",
@@ -83,12 +89,51 @@ export default function Onboarding() {
 
   const progress = (currentStep / steps.length) * 100;
 
-  const handleNext = () => {
+  const getCurrency = () => {
+    const pais = paises.find(p => p.value === formData.country);
+    return pais?.currency || "USD";
+  };
+
+  const handleNext = async () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete onboarding
-      navigate("/app");
+      // Complete onboarding and save to DB
+      setSaving(true);
+      try {
+        // Save profile data
+        const profileData = {
+          country: formData.country || null,
+          currency: getCurrency(),
+          role_target: formData.roleTarget || null,
+          industries: formData.industries.length > 0 ? formData.industries : null,
+          seniority: formData.seniority as Enums<'seniority_level'> || null,
+          skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : null,
+          english_level: formData.englishLevel || null,
+          salary_min: formData.salaryMin ? parseInt(formData.salaryMin) : null,
+          salary_max: formData.salaryMax ? parseInt(formData.salaryMax) : null,
+          availability: formData.availability || null,
+          linkedin_url: formData.linkedinUrl || null,
+        };
+
+        const { error } = await completeOnboarding(profileData);
+        if (error) throw error;
+
+        // Create master resume if CV was provided
+        if (formData.cvText || formData.cvFile) {
+          await createResume({
+            title: 'CV Maestro',
+            raw_text: formData.cvText || null,
+            is_master: true,
+          }, formData.cvFile || undefined);
+        }
+
+        navigate("/app");
+      } catch (error) {
+        console.error('Error saving onboarding:', error);
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -278,7 +323,7 @@ export default function Onboarding() {
                   <Select
                     value={formData.seniority}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, seniority: value })
+                      setFormData({ ...formData, seniority: value as Enums<'seniority_level'> | "" })
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -480,8 +525,13 @@ export default function Onboarding() {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Atrás
             </Button>
-            <Button onClick={handleNext}>
-              {currentStep === steps.length ? (
+            <Button onClick={handleNext} disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : currentStep === steps.length ? (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Comenzar
