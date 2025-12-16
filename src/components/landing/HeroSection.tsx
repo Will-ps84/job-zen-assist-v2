@@ -30,9 +30,12 @@ export function HeroSection() {
           </div>
 
           {/* Headline */}
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight mb-6 animate-slide-up">
-            De la postulación manual a la{" "}
-            <span className="text-gradient">estrategia IA</span>
+          <h1 className="font-display font-bold text-primary-foreground leading-[1.1] mb-6 animate-slide-up text-[clamp(2rem,5vw,3.75rem)]">
+            <span className="block">De la postulación manual</span>
+            <span className="block mt-2">
+              a la{" "}
+              <span className="text-underline-accent">estrategia IA</span>
+            </span>
           </h1>
 
           {/* Subheadline */}

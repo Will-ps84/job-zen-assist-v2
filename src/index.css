@@ -154,8 +154,27 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent;
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline;
+  }
+
+  .text-underline-accent {
+    position: relative;
+    display: inline-block;
+  }
+
+  .text-underline-accent::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    border-radius: 2px;
   }
 
   .card-hover {
