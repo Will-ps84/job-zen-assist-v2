@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Mail, Lock, User, Eye, EyeOff, Globe } from "lucide-react";
+import { Briefcase, Mail, Lock, User, Eye, EyeOff, Globe, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const paises = [
   { value: "MX", label: "🇲🇽 México" },
@@ -31,13 +33,84 @@ export default function Registro() {
     acceptTerms: false,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { signUp, user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/app");
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.acceptTerms) {
+      toast({
+        title: "Error",
+        description: "Debes aceptar los términos y condiciones.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.country) {
+      toast({
+        title: "Error",
+        description: "Por favor selecciona tu país.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Error",
+        description: "La contraseña debe tener al menos 8 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    // Auth logic will be added when Supabase is connected
-    setTimeout(() => setIsLoading(false), 1000);
+
+    const { error } = await signUp(
+      formData.email,
+      formData.password,
+      formData.name,
+      formData.country
+    );
+
+    if (error) {
+      let message = "Error al crear la cuenta";
+      if (error.message.includes("User already registered")) {
+        message = "Este email ya está registrado. Intenta iniciar sesión.";
+      } else if (error.message.includes("Password")) {
+        message = "La contraseña no cumple con los requisitos de seguridad.";
+      }
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    toast({
+      title: "¡Cuenta creada!",
+      description: "Tu cuenta ha sido creada exitosamente.",
+    });
+    navigate("/app/onboarding");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen gradient-hero flex">
@@ -214,7 +287,14 @@ export default function Registro() {
                 size="lg"
                 disabled={isLoading || !formData.acceptTerms}
               >
-                {isLoading ? "Creando cuenta..." : "Crear cuenta gratis"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creando cuenta...
+                  </>
+                ) : (
+                  "Crear cuenta gratis"
+                )}
               </Button>
             </form>
 

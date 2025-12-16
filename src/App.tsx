@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
@@ -23,24 +25,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
-          <Route path="/precios" element={<Precios />} />
-          
-          {/* App routes */}
-          <Route path="/app" element={<Dashboard />} />
-          <Route path="/app/onboarding" element={<Onboarding />} />
-          <Route path="/app/cv" element={<CVEditor />} />
-          <Route path="/app/vacantes" element={<Vacantes />} />
-          <Route path="/app/postulaciones" element={<Postulaciones />} />
-          <Route path="/app/analitica" element={<Analitica />} />
-          
-          {/* Catch-all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
+            <Route path="/precios" element={<Precios />} />
+            
+            {/* App routes (protected) */}
+            <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/app/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route path="/app/cv" element={<ProtectedRoute><CVEditor /></ProtectedRoute>} />
+            <Route path="/app/vacantes" element={<ProtectedRoute><Vacantes /></ProtectedRoute>} />
+            <Route path="/app/postulaciones" element={<ProtectedRoute><Postulaciones /></ProtectedRoute>} />
+            <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
+            
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
