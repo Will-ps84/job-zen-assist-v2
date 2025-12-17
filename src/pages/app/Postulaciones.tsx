@@ -33,17 +33,14 @@ import { useApplications, type ApplicationWithJob } from "@/hooks/useApplication
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
-import type { Enums } from "@/integrations/supabase/types";
 
-type ApplicationStatus = Enums<'application_status'>;
-
-const columns: { id: ApplicationStatus; title: string; color: string }[] = [
+const columns = [
   { id: "saved", title: "Guardada", color: "muted" },
   { id: "applied", title: "Aplicada", color: "info" },
   { id: "interview", title: "Entrevista", color: "accent" },
   { id: "offer", title: "Oferta", color: "success" },
   { id: "closed", title: "Cerrada", color: "muted" },
-];
+] as const;
 
 const paises: Record<string, string> = {
   MX: "México",
@@ -60,7 +57,7 @@ export default function Postulaciones() {
 
   const stats = getStats();
 
-  const handleStatusChange = async (appId: string, newStatus: ApplicationStatus) => {
+  const handleStatusChange = async (appId: string, newStatus: string) => {
     await updateApplication(appId, { status: newStatus });
   };
 

@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -18,16 +17,12 @@ import {
 import {
   FileText,
   Plus,
-  Download,
   Sparkles,
-  CheckCircle2,
-  AlertTriangle,
   Lightbulb,
   Target,
   Edit3,
   Copy,
   Trash2,
-  Upload,
   Loader2,
 } from "lucide-react";
 import { useResumes } from "@/hooks/useResumes";
@@ -36,16 +31,15 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function CVEditor() {
-  const { resumes, loading, createResume, deleteResume, getResumeDownloadUrl } = useResumes();
-  const { achievements, loading: starLoading, createAchievement, deleteAchievement } = useSTAR();
+  const { resumes, loading, createResume, deleteResume } = useResumes();
+  const { stories, loading: starLoading, createStory, deleteStory } = useSTAR();
   
   const [newCVOpen, setNewCVOpen] = useState(false);
   const [newSTAROpen, setNewSTAROpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [newCV, setNewCV] = useState({ title: '', rawText: '', file: null as File | null });
+  const [newCV, setNewCV] = useState({ name: '', rawText: '' });
   const [newSTAR, setNewSTAR] = useState({
-    company: '',
-    role_title: '',
+    title: '',
     situation: '',
     task: '',
     action: '',
@@ -53,35 +47,31 @@ export default function CVEditor() {
   });
 
   const handleCreateCV = async () => {
-    if (!newCV.title.trim()) return;
+    if (!newCV.name.trim()) return;
     setCreating(true);
     await createResume({
-      title: newCV.title,
+      name: newCV.name,
       raw_text: newCV.rawText || null,
       is_master: resumes.length === 0,
-    }, newCV.file || undefined);
+    });
     setCreating(false);
     setNewCVOpen(false);
-    setNewCV({ title: '', rawText: '', file: null });
+    setNewCV({ name: '', rawText: '' });
   };
 
   const handleCreateSTAR = async () => {
     if (!newSTAR.situation || !newSTAR.result) return;
     setCreating(true);
-    await createAchievement({
-      ...newSTAR,
-      confidence: 70,
+    await createStory({
+      title: newSTAR.title || 'Logro STAR',
+      situation: newSTAR.situation,
+      task: newSTAR.task,
+      action: newSTAR.action,
+      result: newSTAR.result,
     });
     setCreating(false);
     setNewSTAROpen(false);
-    setNewSTAR({ company: '', role_title: '', situation: '', task: '', action: '', result: '' });
-  };
-
-  const handleDownload = async (fileUrl: string) => {
-    const url = await getResumeDownloadUrl(fileUrl);
-    if (url) {
-      window.open(url, '_blank');
-    }
+    setNewSTAR({ title: '', situation: '', task: '', action: '', result: '' });
   };
 
   if (loading) {
@@ -120,33 +110,15 @@ export default function CVEditor() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Título del CV</Label>
+                  <Label>Nombre del CV</Label>
                   <Input
                     placeholder="Ej: CV para Product Manager"
-                    value={newCV.title}
-                    onChange={(e) => setNewCV({ ...newCV, title: e.target.value })}
+                    value={newCV.name}
+                    onChange={(e) => setNewCV({ ...newCV, name: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Subir archivo (opcional)</Label>
-                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      className="hidden"
-                      id="cv-file"
-                      onChange={(e) => setNewCV({ ...newCV, file: e.target.files?.[0] || null })}
-                    />
-                    <label htmlFor="cv-file" className="cursor-pointer">
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        {newCV.file ? newCV.file.name : "Arrastra o click para subir"}
-                      </p>
-                    </label>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>O pega el texto de tu CV</Label>
+                  <Label>Contenido de tu CV</Label>
                   <Textarea
                     placeholder="Pega aquí el contenido de tu CV..."
                     value={newCV.rawText}
@@ -154,7 +126,7 @@ export default function CVEditor() {
                     rows={6}
                   />
                 </div>
-                <Button onClick={handleCreateCV} disabled={creating || !newCV.title.trim()} className="w-full">
+                <Button onClick={handleCreateCV} disabled={creating || !newCV.name.trim()} className="w-full">
                   {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
                   Crear CV
                 </Button>
@@ -211,23 +183,13 @@ export default function CVEditor() {
                         )}
                       </div>
                     </div>
-                    <h3 className="font-semibold text-foreground mb-1">{cv.title}</h3>
+                    <h3 className="font-semibold text-foreground mb-1">{cv.name}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Actualizado {format(new Date(cv.updated_at), "d MMM yyyy", { locale: es })}
                     </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Score ATS</span>
-                        <span className="font-semibold text-foreground">{cv.ats_score || 0}%</span>
-                      </div>
-                      <Progress value={cv.ats_score || 0} className="h-2" />
+                    <div className="text-sm text-muted-foreground">
+                      Versión {cv.version || 1}
                     </div>
-                    {cv.file_url && (
-                      <Button variant="outline" className="w-full mt-4" onClick={() => handleDownload(cv.file_url!)}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Descargar
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -237,7 +199,7 @@ export default function CVEditor() {
                 className="border-dashed border-2 border-border hover:border-primary/50 transition-colors cursor-pointer"
                 onClick={() => setNewCVOpen(true)}
               >
-                <CardContent className="pt-6 flex flex-col items-center justify-center h-full min-h-[280px] text-center">
+                <CardContent className="pt-6 flex flex-col items-center justify-center h-full min-h-[200px] text-center">
                   <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mb-4">
                     <Plus className="w-7 h-7 text-muted-foreground" />
                   </div>
@@ -270,23 +232,13 @@ export default function CVEditor() {
                       <DialogTitle>Nuevo logro STAR</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Empresa</Label>
-                          <Input
-                            placeholder="Nombre de la empresa"
-                            value={newSTAR.company}
-                            onChange={(e) => setNewSTAR({ ...newSTAR, company: e.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Puesto</Label>
-                          <Input
-                            placeholder="Tu rol en esa empresa"
-                            value={newSTAR.role_title}
-                            onChange={(e) => setNewSTAR({ ...newSTAR, role_title: e.target.value })}
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label>Título del logro</Label>
+                        <Input
+                          placeholder="Ej: Optimicé proceso de ventas"
+                          value={newSTAR.title}
+                          onChange={(e) => setNewSTAR({ ...newSTAR, title: e.target.value })}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-primary font-medium">S - Situación</Label>
@@ -333,7 +285,7 @@ export default function CVEditor() {
                 </Dialog>
               </CardHeader>
               <CardContent className="space-y-6">
-                {achievements.length === 0 ? (
+                {stories.length === 0 ? (
                   <div className="text-center py-8">
                     <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground mb-4">
@@ -345,7 +297,7 @@ export default function CVEditor() {
                     </Button>
                   </div>
                 ) : (
-                  achievements.map((logro) => (
+                  stories.map((logro) => (
                     <div
                       key={logro.id}
                       className="p-4 rounded-xl border border-border bg-muted/30 space-y-4"
@@ -353,17 +305,23 @@ export default function CVEditor() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h4 className="font-semibold text-foreground">
-                            {logro.role_title || 'Sin puesto'} en {logro.company || 'Sin empresa'}
+                            {logro.title}
                           </h4>
-                          <Badge variant="secondary" className="mt-1">
-                            Confianza: {logro.confidence || 0}%
-                          </Badge>
+                          {logro.competencies && logro.competencies.length > 0 && (
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              {logro.competencies.map((comp, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">
+                                  {comp}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-1">
                           <Button variant="ghost" size="icon">
                             <Edit3 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => deleteAchievement(logro.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => deleteStory(logro.id)}>
                             <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
                         </div>
@@ -403,16 +361,12 @@ export default function CVEditor() {
                     <h4 className="font-semibold text-foreground mb-2">
                       ¿Cómo escribir un buen logro STAR?
                     </h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      El método STAR transforma tus responsabilidades en logros medibles.
-                      Siempre incluye métricas: %, $, tiempo, volumen.
-                    </p>
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p><strong className="text-primary">S:</strong> Contexto o problema inicial</p>
-                      <p><strong className="text-primary">T:</strong> Tu responsabilidad específica</p>
-                      <p><strong className="text-primary">A:</strong> Las acciones que tomaste</p>
-                      <p><strong className="text-success">R:</strong> Resultados medibles</p>
-                    </div>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• <strong>Situación:</strong> Describe el contexto o problema inicial</li>
+                      <li>• <strong>Tarea:</strong> Tu responsabilidad específica</li>
+                      <li>• <strong>Acción:</strong> Lo que hiciste concretamente</li>
+                      <li>• <strong>Resultado:</strong> Impacto cuantificable (%, $, tiempo)</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>
@@ -420,110 +374,18 @@ export default function CVEditor() {
           </TabsContent>
 
           {/* ATS Score Tab */}
-          <TabsContent value="ats" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    Score ATS actual
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {resumes.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">
-                        Crea un CV para ver tu score ATS
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="text-center mb-6">
-                        <div className="text-6xl font-bold text-primary mb-2">
-                          {resumes.find(r => r.is_master)?.ats_score || 0}%
-                        </div>
-                        <p className="text-muted-foreground">
-                          Score de tu CV Maestro
-                        </p>
-                      </div>
-                      <Progress value={resumes.find(r => r.is_master)?.ats_score || 0} className="h-3 mb-6" />
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                          <span className="text-sm text-foreground">Logros STAR registrados</span>
-                          {achievements.length >= 3 ? (
-                            <CheckCircle2 className="w-5 h-5 text-success" />
-                          ) : (
-                            <AlertTriangle className="w-5 h-5 text-warning" />
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                          <span className="text-sm text-foreground">CV con contenido</span>
-                          {resumes.some(r => r.raw_text || r.file_url) ? (
-                            <CheckCircle2 className="w-5 h-5 text-success" />
-                          ) : (
-                            <AlertTriangle className="w-5 h-5 text-destructive" />
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-accent" />
-                    Sugerencias de mejora
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {achievements.length < 3 && (
-                    <div className="p-4 rounded-xl border border-warning/30 bg-warning/5">
-                      <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-warning" />
-                        Pocos logros STAR
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Tienes {achievements.length} logro(s) STAR. Agrega al menos 3-5 para
-                        mostrar tu impacto cuantificable.
-                      </p>
-                      <Button size="sm" variant="outline" onClick={() => setNewSTAROpen(true)}>
-                        Agregar logro
-                      </Button>
-                    </div>
-                  )}
-
-                  {!resumes.some(r => r.raw_text || r.file_url) && (
-                    <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/5">
-                      <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-destructive" />
-                        CV sin contenido
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Tu CV Maestro no tiene contenido. Sube un archivo o pega el texto.
-                      </p>
-                      <Button size="sm" variant="outline" onClick={() => setNewCVOpen(true)}>
-                        Actualizar CV
-                      </Button>
-                    </div>
-                  )}
-
-                  {achievements.length >= 3 && resumes.some(r => r.raw_text || r.file_url) && (
-                    <div className="p-4 rounded-xl border border-success/30 bg-success/5">
-                      <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-success" />
-                        ¡Buen trabajo!
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Tu CV tiene buena base. Sigue agregando logros para destacar más.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="ats" className="space-y-4">
+            <Card className="border-border">
+              <CardContent className="pt-6 text-center py-12">
+                <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold text-foreground mb-2">
+                  Análisis ATS próximamente
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Pronto podrás analizar tu CV contra ofertas de trabajo y optimizarlo para pasar filtros ATS.
+                </p>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

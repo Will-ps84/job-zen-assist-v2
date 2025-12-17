@@ -4,79 +4,76 @@ import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-type Achievement = Tables<'achievements_star'>;
-type AchievementInsert = TablesInsert<'achievements_star'>;
-type AchievementUpdate = TablesUpdate<'achievements_star'>;
+type StarStory = Tables<'star_stories'>;
+type StarStoryInsert = TablesInsert<'star_stories'>;
+type StarStoryUpdate = TablesUpdate<'star_stories'>;
 
 export function useSTAR() {
   const { user } = useAuth();
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [stories, setStories] = useState<StarStory[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchAchievements();
+      fetchStories();
     }
   }, [user]);
 
-  const fetchAchievements = async () => {
+  const fetchStories = async () => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
-        .from('achievements_star')
+        .from('star_stories')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAchievements(data || []);
+      setStories(data || []);
     } catch (error) {
-      console.error('Error fetching achievements:', error);
+      console.error('Error fetching STAR stories:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createAchievement = async (data: Partial<AchievementInsert>) => {
+  const createStory = async (data: Partial<StarStoryInsert>) => {
     if (!user) return { error: new Error('No user') };
 
     try {
-      const { data: achievement, error } = await supabase
-        .from('achievements_star')
+      const { data: story, error } = await supabase
+        .from('star_stories')
         .insert({
           user_id: user.id,
-          company: data.company,
-          role_title: data.role_title,
+          title: data.title || 'Logro STAR',
           situation: data.situation,
           task: data.task,
           action: data.action,
           result: data.result,
-          metrics_json: data.metrics_json,
-          confidence: data.confidence || 0,
-          resume_id: data.resume_id,
+          competencies: data.competencies,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      setAchievements(prev => [achievement, ...prev]);
+      setStories(prev => [story, ...prev]);
       toast.success('Logro STAR creado');
-      return { data: achievement };
+      return { data: story };
     } catch (error) {
-      console.error('Error creating achievement:', error);
+      console.error('Error creating STAR story:', error);
       toast.error('Error al crear logro');
       return { error };
     }
   };
 
-  const updateAchievement = async (id: string, updates: AchievementUpdate) => {
+  const updateStory = async (id: string, updates: StarStoryUpdate) => {
     if (!user) return { error: new Error('No user') };
 
     try {
       const { data, error } = await supabase
-        .from('achievements_star')
+        .from('star_stories')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .eq('user_id', user.id)
@@ -85,48 +82,48 @@ export function useSTAR() {
 
       if (error) throw error;
       
-      setAchievements(prev => prev.map(a => a.id === id ? data : a));
+      setStories(prev => prev.map(s => s.id === id ? data : s));
       toast.success('Logro actualizado');
       return { data };
     } catch (error) {
-      console.error('Error updating achievement:', error);
+      console.error('Error updating STAR story:', error);
       toast.error('Error al actualizar logro');
       return { error };
     }
   };
 
-  const deleteAchievement = async (id: string) => {
+  const deleteStory = async (id: string) => {
     if (!user) return { error: new Error('No user') };
 
     try {
       const { error } = await supabase
-        .from('achievements_star')
+        .from('star_stories')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id);
 
       if (error) throw error;
       
-      setAchievements(prev => prev.filter(a => a.id !== id));
+      setStories(prev => prev.filter(s => s.id !== id));
       toast.success('Logro eliminado');
       return { success: true };
     } catch (error) {
-      console.error('Error deleting achievement:', error);
+      console.error('Error deleting STAR story:', error);
       toast.error('Error al eliminar logro');
       return { error };
     }
   };
 
-  const getByResume = (resumeId: string) => 
-    achievements.filter(a => a.resume_id === resumeId);
+  const getByCompetency = (competency: string) => 
+    stories.filter(s => s.competencies?.includes(competency));
 
   return {
-    achievements,
+    stories,
     loading,
-    createAchievement,
-    updateAchievement,
-    deleteAchievement,
-    getByResume,
-    refetch: fetchAchievements
+    createStory,
+    updateStory,
+    deleteStory,
+    getByCompetency,
+    refetch: fetchStories
   };
 }
