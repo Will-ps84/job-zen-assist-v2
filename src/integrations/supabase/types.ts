@@ -104,6 +104,45 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          page_url: string | null
+          screenshot_url: string | null
+          severity: string | null
+          status: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          page_url?: string | null
+          screenshot_url?: string | null
+          severity?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          page_url?: string | null
+          screenshot_url?: string | null
+          severity?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_portals: {
         Row: {
           country: string

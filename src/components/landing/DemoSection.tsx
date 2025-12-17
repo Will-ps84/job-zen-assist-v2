@@ -45,6 +45,19 @@ export function DemoSection() {
 
       if (error) throw error;
       setResult(data);
+
+      // Track demo_used event (anonymous - no user_id required for landing)
+      try {
+        await supabase.from('kpi_events').insert([{
+          user_id: '00000000-0000-0000-0000-000000000000', // Anonymous placeholder
+          event_type: 'demo_used',
+          value: 1,
+          metadata: { source: 'landing' }
+        }]);
+      } catch (e) {
+        // Silently fail - demo tracking is non-critical
+        console.log('Demo tracking skipped (expected if not logged in)');
+      }
     } catch (error) {
       console.error("Error analyzing job:", error);
       toast.error("Error al analizar. Intenta de nuevo.");

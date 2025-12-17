@@ -15,10 +15,19 @@ interface AdminStats {
   onboardingCompleted: number;
   onboardingRate: number;
   totalCVs: number;
+  totalSTAR: number;
   totalJobs: number;
   totalMatches: number;
+  totalInterviewSims: number;
   applicationsByStatus: Record<string, number>;
   topCountries: { country: string; count: number }[];
+  // Funnel metrics (percentages)
+  funnelCVRate: number;
+  funnelSTARRate: number;
+  funnelJobRate: number;
+  funnelMatchRate: number;
+  funnelKanbanRate: number;
+  funnelSimRate: number;
 }
 
 export function useAdminData() {
@@ -90,6 +99,11 @@ export function useAdminData() {
       .from('resumes')
       .select('*', { count: 'exact', head: true });
 
+    // Fetch STAR stories count
+    const { count: totalSTAR } = await supabase
+      .from('star_stories')
+      .select('*', { count: 'exact', head: true });
+
     // Fetch jobs count
     const { count: totalJobs } = await supabase
       .from('jobs')
@@ -99,6 +113,12 @@ export function useAdminData() {
     const { count: totalMatches } = await supabase
       .from('matches')
       .select('*', { count: 'exact', head: true });
+
+    // Fetch interview sim completions from kpi_events
+    const { count: totalInterviewSims } = await supabase
+      .from('kpi_events')
+      .select('*', { count: 'exact', head: true })
+      .eq('event_type', 'interview_sim_completed');
 
     // Fetch applications by status
     const { data: applications } = await supabase
@@ -123,6 +143,16 @@ export function useAdminData() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    // Calculate funnel rates
+    const totalSignups = profiles.length;
+    const funnelCVRate = totalSignups > 0 ? Math.round(((totalCVs || 0) / totalSignups) * 100) : 0;
+    const funnelSTARRate = totalSignups > 0 ? Math.round(((totalSTAR || 0) / totalSignups) * 100) : 0;
+    const funnelJobRate = totalSignups > 0 ? Math.round(((totalJobs || 0) / totalSignups) * 100) : 0;
+    const funnelMatchRate = totalSignups > 0 ? Math.round(((totalMatches || 0) / totalSignups) * 100) : 0;
+    const totalInKanban = (applications || []).length;
+    const funnelKanbanRate = totalSignups > 0 ? Math.round((totalInKanban / totalSignups) * 100) : 0;
+    const funnelSimRate = totalSignups > 0 ? Math.round(((totalInterviewSims || 0) / totalSignups) * 100) : 0;
+
     setStats({
       totalUsers: profiles.length,
       newUsersLast7Days,
@@ -132,10 +162,18 @@ export function useAdminData() {
         ? Math.round(((onboardingCompleted || 0) / profiles.length) * 100) 
         : 0,
       totalCVs: totalCVs || 0,
+      totalSTAR: totalSTAR || 0,
       totalJobs: totalJobs || 0,
       totalMatches: totalMatches || 0,
+      totalInterviewSims: totalInterviewSims || 0,
       applicationsByStatus,
       topCountries,
+      funnelCVRate,
+      funnelSTARRate,
+      funnelJobRate,
+      funnelMatchRate,
+      funnelKanbanRate,
+      funnelSimRate,
     });
   };
 

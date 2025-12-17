@@ -17,7 +17,9 @@ import {
   Globe,
   Loader2,
   CheckCircle2,
-  Clock
+  Clock,
+  Star,
+  MessageSquare
 } from 'lucide-react';
 
 export default function AdminMetrics() {
@@ -72,6 +74,13 @@ export default function AdminMetrics() {
       bgColor: 'bg-purple-500/10',
     },
     {
+      title: 'Historias STAR',
+      value: stats.totalSTAR,
+      icon: Star,
+      color: 'text-amber-500',
+      bgColor: 'bg-amber-500/10',
+    },
+    {
       title: 'Vacantes Agregadas',
       value: stats.totalJobs,
       icon: Target,
@@ -84,6 +93,13 @@ export default function AdminMetrics() {
       icon: CheckCircle2,
       color: 'text-cyan-500',
       bgColor: 'bg-cyan-500/10',
+    },
+    {
+      title: 'Simulaciones',
+      value: stats.totalInterviewSims,
+      icon: MessageSquare,
+      color: 'text-pink-500',
+      bgColor: 'bg-pink-500/10',
     },
   ];
 
@@ -153,6 +169,37 @@ export default function AdminMetrics() {
             </CardContent>
           </Card>
 
+          {/* User Funnel */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Funnel de Usuarios
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {[
+                  { label: 'Onboarding', value: stats.onboardingRate },
+                  { label: 'Subió CV', value: stats.funnelCVRate },
+                  { label: 'Creó STAR', value: stats.funnelSTARRate },
+                  { label: 'Agregó Vacante', value: stats.funnelJobRate },
+                  { label: 'Generó Match', value: stats.funnelMatchRate },
+                  { label: 'Usó Kanban', value: stats.funnelKanbanRate },
+                  { label: 'Completó Simulador', value: stats.funnelSimRate },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm">{item.label}</span>
+                      <span className="text-sm text-muted-foreground">{item.value}%</span>
+                    </div>
+                    <Progress value={item.value} className="h-2" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Applications Funnel */}
           <Card>
             <CardHeader>
@@ -187,7 +234,7 @@ export default function AdminMetrics() {
           </Card>
 
           {/* Top Countries */}
-          <Card className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Globe className="w-5 h-5 text-primary" />
@@ -195,7 +242,7 @@ export default function AdminMetrics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {stats.topCountries.map((country, i) => {
                   const countryNames: Record<string, string> = {
                     MX: 'México',

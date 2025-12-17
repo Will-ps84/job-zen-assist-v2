@@ -24,6 +24,21 @@ interface ChannelStats {
   fill: string;
 }
 
+// Event types for tracking
+export const KPI_EVENT_TYPES = {
+  DEMO_USED: 'demo_used',
+  SIGNUP_COMPLETED: 'signup_completed',
+  ONBOARDING_COMPLETED: 'onboarding_completed',
+  RESUME_UPLOADED: 'resume_uploaded',
+  RESUME_EDITED: 'resume_edited',
+  STAR_CREATED: 'star_created',
+  STAR_INSERTED_INTO_CV: 'star_inserted_into_cv',
+  JOB_ADDED: 'job_added',
+  MATCH_GENERATED: 'match_generated',
+  APPLICATION_MOVED: 'application_moved',
+  INTERVIEW_SIM_COMPLETED: 'interview_sim_completed',
+} as const;
+
 export function useKPIEvents() {
   const { user } = useAuth();
   const [events, setEvents] = useState<KPIEvent[]>([]);

@@ -32,6 +32,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { toast } from "@/hooks/use-toast";
+import { FeedbackButton } from "./FeedbackButton";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
@@ -222,6 +223,9 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Page content */}
         <main className="p-4 md:p-6 lg:p-8">{children}</main>
       </div>
+
+      {/* Feedback Button */}
+      <FeedbackButton />
     </div>
   );
 }

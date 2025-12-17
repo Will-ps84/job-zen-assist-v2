@@ -34,6 +34,8 @@ const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
 const AdminPortals = lazy(() => import("./pages/admin/AdminPortals"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
+const BetaChecklist = lazy(() => import("./pages/admin/BetaChecklist"));
+const AdminFeedback = lazy(() => import("./pages/admin/AdminFeedback"));
 
 // Loading fallback
 const PageLoader = () => (
@@ -87,6 +89,8 @@ const App = () => (
               <Route path="/admin/portals" element={<ProtectedRoute><AdminPortals /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
               <Route path="/admin/metrics" element={<ProtectedRoute><AdminMetrics /></ProtectedRoute>} />
+              <Route path="/admin/beta-checklist" element={<ProtectedRoute><BetaChecklist /></ProtectedRoute>} />
+              <Route path="/admin/feedback" element={<ProtectedRoute><AdminFeedback /></ProtectedRoute>} />
               
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
