@@ -13,10 +13,40 @@ import {
   Users,
   Shield,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  CheckSquare,
+  MessageSquare
 } from 'lucide-react';
 
 const adminModules = [
+  {
+    title: 'Beta Checklist',
+    description: 'Pruebas QA para lanzamiento',
+    icon: CheckSquare,
+    href: '/admin/beta-checklist',
+    color: 'text-emerald-500',
+  },
+  {
+    title: 'Métricas Globales',
+    description: 'KPIs y funnel de conversión',
+    icon: BarChart3,
+    href: '/admin/metrics',
+    color: 'text-cyan-500',
+  },
+  {
+    title: 'Feedback de Usuarios',
+    description: 'Bugs y sugerencias reportadas',
+    icon: MessageSquare,
+    href: '/admin/feedback',
+    color: 'text-amber-500',
+  },
+  {
+    title: 'Gestión de Usuarios',
+    description: 'Asigna roles admin/usuario',
+    icon: Users,
+    href: '/admin/users',
+    color: 'text-pink-500',
+  },
   {
     title: 'Configuración de Marca',
     description: 'Edita nombre, logo y eslogan',
@@ -37,20 +67,6 @@ const adminModules = [
     icon: Globe,
     href: '/admin/portals',
     color: 'text-green-500',
-  },
-  {
-    title: 'Gestión de Usuarios',
-    description: 'Asigna roles admin/usuario',
-    icon: Users,
-    href: '/admin/users',
-    color: 'text-pink-500',
-  },
-  {
-    title: 'Métricas Globales',
-    description: 'KPIs anonimizados del sistema',
-    icon: BarChart3,
-    href: '/admin/metrics',
-    color: 'text-cyan-500',
   },
   {
     title: 'Planes y Límites',
