@@ -538,6 +538,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_user_role: {
+        Args: { new_role: string; target_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

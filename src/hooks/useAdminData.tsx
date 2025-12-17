@@ -139,56 +139,37 @@ export function useAdminData() {
     });
   };
 
-  const assignRole = async (userId: string, role: 'admin' | 'user') => {
+  const setUserRole = async (userId: string, role: 'admin' | 'user' | 'remove') => {
     try {
-      // Check if user already has a role
-      const existing = users.find(u => u.user_id === userId);
-      
-      if (existing?.role) {
-        // Update existing role
-        const { error } = await supabase
-          .from('user_roles')
-          .update({ role })
-          .eq('user_id', userId);
-        
-        if (error) throw error;
-      } else {
-        // Insert new role
-        const { error } = await supabase
-          .from('user_roles')
-          .insert([{ user_id: userId, role }]);
-        
-        if (error) throw error;
-      }
-
-      setUsers(prev => prev.map(u => 
-        u.user_id === userId ? { ...u, role } : u
-      ));
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error assigning role:', error);
-      return { error };
-    }
-  };
-
-  const removeRole = async (userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
+      const { data, error } = await supabase.rpc('set_user_role', {
+        target_user_id: userId,
+        new_role: role,
+      });
 
       if (error) throw error;
 
-      setUsers(prev => prev.map(u => 
-        u.user_id === userId ? { ...u, role: null } : u
-      ));
+      // Check RPC response
+      const result = data as { success: boolean; error?: string; message?: string };
+      
+      if (!result.success) {
+        return { error: result.error || 'Error desconocido' };
+      }
 
-      return { success: true };
+      // Update local state
+      if (role === 'remove') {
+        setUsers(prev => prev.map(u => 
+          u.user_id === userId ? { ...u, role: null } : u
+        ));
+      } else {
+        setUsers(prev => prev.map(u => 
+          u.user_id === userId ? { ...u, role } : u
+        ));
+      }
+
+      return { success: true, message: result.message };
     } catch (error) {
-      console.error('Error removing role:', error);
-      return { error };
+      console.error('Error setting role via RPC:', error);
+      return { error: error instanceof Error ? error.message : 'Error al cambiar rol' };
     }
   };
 
@@ -198,8 +179,7 @@ export function useAdminData() {
     users,
     stats,
     loading,
-    assignRole,
-    removeRole,
+    setUserRole,
     adminCount,
     refetch: fetchData,
   };

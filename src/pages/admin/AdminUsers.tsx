@@ -22,7 +22,7 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
-  const { users, loading, assignRole, removeRole, adminCount, refetch } = useAdminData();
+  const { users, loading, setUserRole, adminCount, refetch } = useAdminData();
   const [processing, setProcessing] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,32 +33,16 @@ export default function AdminUsers() {
   }, [isAdmin, roleLoading, navigate]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    // Prevent removing the last admin
-    if (newRole === 'remove' && adminCount <= 1) {
-      const targetUser = users.find(u => u.user_id === userId);
-      if (targetUser?.role === 'admin') {
-        toast.error('No puedes eliminar al último administrador');
-        return;
-      }
-    }
-
-    // Prevent self-demotion if last admin
-    if (userId === user?.id && newRole !== 'admin' && adminCount <= 1) {
-      toast.error('No puedes quitarte el rol de admin siendo el único');
-      return;
-    }
-
     setProcessing(userId);
 
     try {
-      if (newRole === 'remove') {
-        const { error } = await removeRole(userId);
-        if (error) throw error;
-        toast.success('Rol eliminado');
+      const role = newRole === 'none' ? 'remove' : newRole as 'admin' | 'user';
+      const result = await setUserRole(userId, role);
+      
+      if (result.error) {
+        toast.error(result.error);
       } else {
-        const { error } = await assignRole(userId, newRole as 'admin' | 'user');
-        if (error) throw error;
-        toast.success('Rol actualizado');
+        toast.success(result.message || 'Rol actualizado');
       }
     } catch (error) {
       toast.error('Error al actualizar rol');

@@ -1,27 +1,100 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins for CORS - production and development
+const ALLOWED_ORIGINS = [
+  "https://olzwgallpissgwwvmqhe.lovableproject.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+const MAX_JOB_DESC_LENGTH = 20000; // 20KB max for job description
+const MAX_BODY_SIZE = 50000; // 50KB max total body size
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : "";
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
 
 serve(async (req) => {
+  const origin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin);
+
+  // Reject requests from non-allowed origins
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    console.warn(`Blocked request from unauthorized origin: ${origin}`);
+    return new Response(
+      JSON.stringify({ error: "Origin not allowed" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { jobDescription } = await req.json();
-
-    if (!jobDescription || jobDescription.length < 50) {
+    // Check Content-Length header first
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
       return new Response(
-        JSON.stringify({ error: "Job description too short" }),
+        JSON.stringify({ error: "Payload demasiado grande. Máximo 50KB." }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const bodyText = await req.text();
+    
+    // Validate actual body size
+    if (bodyText.length > MAX_BODY_SIZE) {
+      return new Response(
+        JSON.stringify({ error: "Payload demasiado grande. Máximo 50KB." }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "JSON inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { jobDescription } = body;
+
+    // Validate jobDescription exists and is a string
+    if (!jobDescription || typeof jobDescription !== "string") {
+      return new Response(
+        JSON.stringify({ error: "Se requiere una descripción de vacante" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate minimum length
+    if (jobDescription.length < 50) {
+      return new Response(
+        JSON.stringify({ error: "Descripción muy corta. Mínimo 50 caracteres." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate maximum length
+    if (jobDescription.length > MAX_JOB_DESC_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Descripción muy larga. Máximo ${MAX_JOB_DESC_LENGTH.toLocaleString()} caracteres.` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY not configured");
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
@@ -51,7 +124,7 @@ El score debe ser realista basado en lo que pide la vacante.`;
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analiza esta vacante:\n\n${jobDescription}` },
+          { role: "user", content: `Analiza esta vacante:\n\n${jobDescription.slice(0, MAX_JOB_DESC_LENGTH)}` },
         ],
       }),
     });
