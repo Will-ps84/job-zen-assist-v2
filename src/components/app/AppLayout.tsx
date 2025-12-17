@@ -18,6 +18,7 @@ import {
   LogOut,
   ChevronDown,
   Bell,
+  Star,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,7 +33,8 @@ import { toast } from "@/hooks/use-toast";
 const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/perfil", label: "Perfil & Objetivos", icon: User },
-  { href: "/app/cv", label: "CV & STAR", icon: FileText },
+  { href: "/app/cv", label: "CV Maestro", icon: FileText },
+  { href: "/app/star", label: "STAR Wizard", icon: Star },
   { href: "/app/vacantes", label: "Vacantes", icon: Target },
   { href: "/app/postulaciones", label: "Postulaciones", icon: Kanban },
   { href: "/app/entrevistas", label: "Simulador", icon: MessageSquare },

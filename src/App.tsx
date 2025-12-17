@@ -20,6 +20,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Dashboard = lazy(() => import("./pages/app/Dashboard"));
 const Onboarding = lazy(() => import("./pages/app/Onboarding"));
 const CVEditor = lazy(() => import("./pages/app/CVEditor"));
+const STARWizard = lazy(() => import("./pages/app/STARWizard"));
 const Vacantes = lazy(() => import("./pages/app/Vacantes"));
 const Postulaciones = lazy(() => import("./pages/app/Postulaciones"));
 const Analitica = lazy(() => import("./pages/app/Analitica"));
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/app/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/app/cv" element={<ProtectedRoute><CVEditor /></ProtectedRoute>} />
+              <Route path="/app/star" element={<ProtectedRoute><STARWizard /></ProtectedRoute>} />
               <Route path="/app/vacantes" element={<ProtectedRoute><Vacantes /></ProtectedRoute>} />
               <Route path="/app/postulaciones" element={<ProtectedRoute><Postulaciones /></ProtectedRoute>} />
               <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
