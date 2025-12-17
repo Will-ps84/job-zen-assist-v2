@@ -36,14 +36,22 @@ import {
   Star,
   ArrowRight,
   Clipboard,
+  Upload,
+  X,
+  Save,
+  Download,
 } from "lucide-react";
 import { useResumes } from "@/hooks/useResumes";
+import { useResumeStorage } from "@/hooks/useResumeStorage";
 import { useSTAR } from "@/hooks/useSTAR";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Resume = Tables<'resumes'>;
 
 // Format STAR story as a CV bullet point
 const formatSTARForCV = (story: {
@@ -54,7 +62,6 @@ const formatSTARForCV = (story: {
   const action = story.action || "";
   const result = story.result || "";
   
-  // Extract the main action verb and combine with result
   if (action && result) {
     return `${action.charAt(0).toUpperCase()}${action.slice(1)}. ${result}`;
   }
@@ -65,26 +72,84 @@ const formatSTARForCV = (story: {
 };
 
 export default function CVEditor() {
-  const { resumes, loading, createResume, deleteResume } = useResumes();
+  const { resumes, loading, createResume, updateResume, deleteResume } = useResumes();
+  const { uploadResume, downloadResume, uploading } = useResumeStorage();
   const { stories, loading: starLoading } = useSTAR();
   
   const [newCVOpen, setNewCVOpen] = useState(false);
+  const [editingCV, setEditingCV] = useState<Resume | null>(null);
   const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [newCV, setNewCV] = useState({ name: '', rawText: '' });
+  const [editForm, setEditForm] = useState({ name: '', rawText: '' });
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [starPanelOpen, setStarPanelOpen] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleCreateCV = async () => {
     if (!newCV.name.trim()) return;
     setCreating(true);
-    await createResume({
+    
+    const { data: resumeData } = await createResume({
       name: newCV.name,
       raw_text: newCV.rawText || null,
       is_master: resumes.length === 0,
     });
+
+    // Upload file if provided
+    if (uploadedFile && resumeData?.id) {
+      await uploadResume(uploadedFile, resumeData.id);
+    }
+
     setCreating(false);
     setNewCVOpen(false);
     setNewCV({ name: '', rawText: '' });
+    setUploadedFile(null);
+  };
+
+  // P0.5: Edit existing CV
+  const handleEditCV = (cv: Resume) => {
+    setEditingCV(cv);
+    setEditForm({
+      name: cv.name,
+      rawText: cv.raw_text || '',
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCV) return;
+    setSaving(true);
+    
+    await updateResume(editingCV.id, {
+      name: editForm.name,
+      raw_text: editForm.rawText,
+    });
+    
+    setSaving(false);
+    setEditingCV(null);
+    toast.success("CV guardado correctamente");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, forEdit = false) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Solo se permiten archivos PDF o DOCX");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("El archivo no puede superar 5MB");
+        return;
+      }
+      
+      if (forEdit && editingCV) {
+        // Upload immediately for edit mode
+        uploadResume(file, editingCV.id);
+      } else {
+        setUploadedFile(file);
+      }
+    }
   };
 
   const copySTARToClipboard = async (story: typeof stories[0]) => {
@@ -99,12 +164,19 @@ export default function CVEditor() {
     }
   };
 
-  const insertSTARIntoCV = (story: typeof stories[0]) => {
+  const insertSTARIntoCV = (story: typeof stories[0], forEdit = false) => {
     const formatted = formatSTARForCV(story);
-    setNewCV(prev => ({
-      ...prev,
-      rawText: prev.rawText ? `${prev.rawText}\n\n• ${formatted}` : `• ${formatted}`
-    }));
+    if (forEdit) {
+      setEditForm(prev => ({
+        ...prev,
+        rawText: prev.rawText ? `${prev.rawText}\n\n• ${formatted}` : `• ${formatted}`
+      }));
+    } else {
+      setNewCV(prev => ({
+        ...prev,
+        rawText: prev.rawText ? `${prev.rawText}\n\n• ${formatted}` : `• ${formatted}`
+      }));
+    }
     toast.success("Logro insertado en el CV");
   };
 
@@ -160,6 +232,45 @@ export default function CVEditor() {
                         onChange={(e) => setNewCV({ ...newCV, name: e.target.value })}
                       />
                     </div>
+
+                    {/* P0.2: File upload */}
+                    <div className="space-y-2">
+                      <Label>Subir archivo (PDF o DOCX)</Label>
+                      <div className="border-2 border-dashed border-border rounded-xl p-4 text-center hover:border-primary/50 transition-colors">
+                        {uploadedFile ? (
+                          <div className="flex items-center justify-center gap-3">
+                            <FileText className="w-6 h-6 text-primary" />
+                            <div className="text-left">
+                              <p className="font-medium text-foreground text-sm">{uploadedFile.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {(uploadedFile.size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setUploadedFile(null)}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              accept=".pdf,.docx"
+                              onChange={(e) => handleFileChange(e, false)}
+                              className="hidden"
+                            />
+                            <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                            <p className="text-xs text-muted-foreground">
+                              <span className="text-primary font-medium">Haz clic</span> o arrastra un archivo
+                            </p>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label>Contenido de tu CV</Label>
@@ -201,7 +312,7 @@ export default function CVEditor() {
                                       key={story.id}
                                       className="cursor-pointer hover:border-primary/50 transition-all hover:shadow-md"
                                       onClick={() => {
-                                        insertSTARIntoCV(story);
+                                        insertSTARIntoCV(story, !!editingCV);
                                         setStarPanelOpen(false);
                                       }}
                                     >
@@ -241,12 +352,12 @@ export default function CVEditor() {
                         placeholder="Pega aquí el contenido de tu CV o inserta logros STAR..."
                         value={newCV.rawText}
                         onChange={(e) => setNewCV({ ...newCV, rawText: e.target.value })}
-                        rows={12}
+                        rows={10}
                         className="font-mono text-sm"
                       />
                     </div>
-                    <Button onClick={handleCreateCV} disabled={creating || !newCV.name.trim()} className="w-full">
-                      {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                    <Button onClick={handleCreateCV} disabled={creating || uploading || !newCV.name.trim()} className="w-full">
+                      {creating || uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
                       Crear CV
                     </Button>
                   </div>
@@ -298,6 +409,100 @@ export default function CVEditor() {
           </div>
         </div>
 
+        {/* P0.5: Edit Modal */}
+        <Dialog open={!!editingCV} onOpenChange={(open) => !open && setEditingCV(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5" />
+                Editar CV
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Nombre del CV</Label>
+                <Input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                />
+              </div>
+
+              {/* File info / upload */}
+              {editingCV?.file_url && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium">{editingCV.file_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {editingCV.file_size ? `${(editingCV.file_size / 1024).toFixed(1)} KB` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => editingCV.file_url && downloadResume(editingCV.file_url, editingCV.file_name || 'cv.pdf')}
+                  >
+                    <Download className="w-4 h-4 mr-1" />
+                    Descargar
+                  </Button>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Subir nuevo archivo</Label>
+                <label className="cursor-pointer block">
+                  <input
+                    type="file"
+                    accept=".pdf,.docx"
+                    onChange={(e) => handleFileChange(e, true)}
+                    className="hidden"
+                  />
+                  <div className="border-2 border-dashed border-border rounded-lg p-3 text-center hover:border-primary/50 transition-colors">
+                    <Upload className="w-6 h-6 text-muted-foreground mx-auto mb-1" />
+                    <p className="text-xs text-muted-foreground">
+                      {uploading ? "Subiendo..." : "Haz clic para reemplazar archivo"}
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Contenido del CV</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary"
+                    onClick={() => setStarPanelOpen(true)}
+                  >
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    Insertar STAR
+                  </Button>
+                </div>
+                <Textarea
+                  value={editForm.rawText}
+                  onChange={(e) => setEditForm({ ...editForm, rawText: e.target.value })}
+                  rows={12}
+                  className="font-mono text-sm"
+                  placeholder="Contenido de tu CV..."
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setEditingCV(null)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={saving}>
+                  {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Guardar cambios
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Tabs defaultValue="versions" className="space-y-6">
           <TabsList>
             <TabsTrigger value="versions">
@@ -333,7 +538,8 @@ export default function CVEditor() {
                         <FileText className="w-6 h-6 text-primary" />
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon">
+                        {/* P0.5: Edit button */}
+                        <Button variant="ghost" size="icon" onClick={() => handleEditCV(cv)}>
                           <Edit3 className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon">
@@ -347,10 +553,16 @@ export default function CVEditor() {
                       </div>
                     </div>
                     <h3 className="font-semibold text-foreground mb-1">{cv.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-2">
                       Actualizado {format(new Date(cv.updated_at), "d MMM yyyy", { locale: es })}
                     </p>
-                    <div className="text-sm text-muted-foreground">
+                    {cv.file_name && (
+                      <Badge variant="secondary" className="text-xs">
+                        <FileText className="w-3 h-3 mr-1" />
+                        {cv.file_name}
+                      </Badge>
+                    )}
+                    <div className="text-sm text-muted-foreground mt-2">
                       Versión {cv.version || 1}
                     </div>
                   </CardContent>
@@ -375,7 +587,7 @@ export default function CVEditor() {
             </div>
           </TabsContent>
 
-          {/* STAR Tab - Quick view with copy functionality */}
+          {/* STAR Tab */}
           <TabsContent value="star" className="space-y-6">
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -415,48 +627,33 @@ export default function CVEditor() {
                           <CardContent className="pt-4">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <h4 className="font-semibold text-foreground">
-                                    {story.title}
-                                  </h4>
-                                  {story.competencies && story.competencies.length > 0 && (
-                                    <div className="flex gap-1 flex-wrap">
-                                      {story.competencies.slice(0, 2).map((comp) => (
-                                        <Badge key={comp} variant="secondary" className="text-xs">
-                                          {comp}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                {/* Formatted preview */}
-                                <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                                  <p className="text-sm text-foreground font-mono">
-                                    • {formatSTARForCV(story)}
+                                <h4 className="font-medium text-foreground mb-1">
+                                  {story.title}
+                                </h4>
+                                {story.result && (
+                                  <p className="text-sm text-success mb-2">
+                                    {story.result}
                                   </p>
-                                </div>
+                                )}
+                                {story.competencies && story.competencies.length > 0 && (
+                                  <div className="flex gap-1 flex-wrap">
+                                    {story.competencies.map((comp) => (
+                                      <Badge key={comp} variant="secondary" className="text-xs">
+                                        {comp}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => copySTARToClipboard(story)}
-                                className={cn(
-                                  "shrink-0 gap-2",
-                                  copiedId === story.id && "bg-success/10 text-success border-success"
-                                )}
                               >
                                 {copiedId === story.id ? (
-                                  <>
-                                    <Check className="w-4 h-4" />
-                                    Copiado
-                                  </>
+                                  <Check className="w-4 h-4 text-success" />
                                 ) : (
-                                  <>
-                                    <Clipboard className="w-4 h-4" />
-                                    Copiar
-                                  </>
+                                  <Clipboard className="w-4 h-4" />
                                 )}
                               </Button>
                             </div>
@@ -468,44 +665,25 @@ export default function CVEditor() {
                 )}
               </CardContent>
             </Card>
-
-            {/* STAR Helper */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Lightbulb className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">
-                      Usa el STAR Wizard para mejores resultados
-                    </h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      El STAR Wizard te guía paso a paso para crear logros con métricas cuantificables que impresionan a reclutadores.
-                    </p>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to="/app/star">
-                        Ir al STAR Wizard
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
-          {/* ATS Score Tab */}
-          <TabsContent value="ats" className="space-y-4">
+          {/* ATS Tab */}
+          <TabsContent value="ats" className="space-y-6">
             <Card className="border-border">
-              <CardContent className="pt-6 text-center py-12">
-                <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold text-foreground mb-2">
-                  Análisis ATS próximamente
-                </h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Pronto podrás analizar tu CV contra ofertas de trabajo y optimizarlo para pasar filtros ATS.
-                </p>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-primary" />
+                  Análisis ATS
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Próximamente: análisis de compatibilidad ATS para tu CV
+                  </p>
+                  <Badge variant="secondary">En desarrollo</Badge>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

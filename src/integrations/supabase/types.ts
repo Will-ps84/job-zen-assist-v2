@@ -296,6 +296,7 @@ export type Database = {
           role_target: string | null
           salary_max: number | null
           salary_min: number | null
+          salary_period: string | null
           seniority: string | null
           skills: string[] | null
           updated_at: string
@@ -318,6 +319,7 @@ export type Database = {
           role_target?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_period?: string | null
           seniority?: string | null
           skills?: string[] | null
           updated_at?: string
@@ -340,6 +342,7 @@ export type Database = {
           role_target?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_period?: string | null
           seniority?: string | null
           skills?: string[] | null
           updated_at?: string
