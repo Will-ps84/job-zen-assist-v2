@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Sparkles, Target, TrendingUp, Users } from "lucide-react";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 
 const benefits = [
   "Optimización ATS inteligente",
@@ -9,6 +10,8 @@ const benefits = [
 ];
 
 export function HeroSection() {
+  const { settings } = useBrandSettings();
+
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden">
       {/* Background decorations */}
@@ -25,7 +28,7 @@ export function HeroSection() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 mb-8 animate-fade-in">
             <Sparkles className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-primary-foreground">
-              Copiloto de Postulación Inteligente
+              {settings.slogan}
             </span>
           </div>
 
@@ -41,8 +44,8 @@ export function HeroSection() {
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8 animate-slide-up delay-100">
             Transforma tu búsqueda de empleo con optimización de CV inteligente,
-            matching de alto umbral y postulación asistida. Tu mentor digital
-            para conseguir el trabajo que mereces.
+            matching de alto umbral y postulación asistida. {settings.brand_name}{" "}
+            te guía para conseguir el trabajo que mereces.
           </p>
 
           {/* Benefits */}

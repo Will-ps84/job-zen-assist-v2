@@ -25,6 +25,10 @@ const Vacantes = lazy(() => import("./pages/app/Vacantes"));
 const Postulaciones = lazy(() => import("./pages/app/Postulaciones"));
 const Analitica = lazy(() => import("./pages/app/Analitica"));
 
+// Lazy load - admin pages
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const BrandSettings = lazy(() => import("./pages/admin/BrandSettings"));
+
 // Loading fallback
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -35,8 +39,8 @@ const PageLoader = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
@@ -60,12 +64,17 @@ const App = () => (
               
               {/* App routes (protected) */}
               <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/app/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/app/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
               <Route path="/app/cv" element={<ProtectedRoute><CVEditor /></ProtectedRoute>} />
               <Route path="/app/star" element={<ProtectedRoute><STARWizard /></ProtectedRoute>} />
               <Route path="/app/vacantes" element={<ProtectedRoute><Vacantes /></ProtectedRoute>} />
               <Route path="/app/postulaciones" element={<ProtectedRoute><Postulaciones /></ProtectedRoute>} />
               <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
+              
+              {/* Admin routes (protected + role checked in component) */}
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/brand" element={<ProtectedRoute><BrandSettings /></ProtectedRoute>} />
               
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />

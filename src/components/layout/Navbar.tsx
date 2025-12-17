@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Briefcase } from "lucide-react";
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 
 const navLinks = [
   { href: "/#como-funciona", label: "Cómo funciona", isAnchor: true },
@@ -14,6 +15,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { settings } = useBrandSettings();
 
   const handleNavClick = useCallback((href: string, isAnchor: boolean) => {
     setIsOpen(false);
@@ -21,11 +23,9 @@ export function Navbar() {
     if (isAnchor) {
       const [path, hash] = href.split('#');
       if (location.pathname === '/' || location.pathname === path) {
-        // Same page, scroll to anchor
         const element = document.getElementById(hash);
         element?.scrollIntoView({ behavior: 'smooth' });
       } else {
-        // Navigate to page then scroll
         navigate(path || '/');
         setTimeout(() => {
           const element = document.getElementById(hash);
@@ -42,14 +42,24 @@ export function Navbar() {
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-            <Briefcase className="w-5 h-5 text-primary-foreground" />
-          </div>
+          {settings.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt={settings.brand_name} 
+              className="w-10 h-10 rounded-xl object-contain"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+              <Briefcase className="w-5 h-5 text-primary-foreground" />
+            </div>
+          )}
           <div className="flex flex-col">
             <span className="font-display font-bold text-lg leading-tight text-foreground">
-              El Mentor
+              {settings.brand_name.split(' ')[0] || 'El Mentor'}
             </span>
-            <span className="text-xs text-muted-foreground -mt-1">Digital</span>
+            <span className="text-xs text-muted-foreground -mt-1">
+              {settings.brand_name.split(' ').slice(1).join(' ') || 'Digital'}
+            </span>
           </div>
         </Link>
 

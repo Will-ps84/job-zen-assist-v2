@@ -19,6 +19,7 @@ import {
   ChevronDown,
   Bell,
   Star,
+  Shield,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -28,6 +29,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { toast } from "@/hooks/use-toast";
 
 const navItems = [
@@ -51,6 +54,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
+  const { settings } = useBrandSettings();
 
   const handleSignOut = async () => {
     await signOut();
@@ -84,15 +89,23 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Logo */}
           <div className="p-4 border-b border-sidebar-border">
             <Link to="/app" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-sidebar-primary-foreground" />
-              </div>
+              {settings.logo_url ? (
+                <img
+                  src={settings.logo_url}
+                  alt={settings.brand_name}
+                  className="w-10 h-10 rounded-xl object-contain"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-sidebar-primary-foreground" />
+                </div>
+              )}
               <div className="flex flex-col">
                 <span className="font-display font-bold text-lg leading-tight text-sidebar-foreground">
-                  El Mentor
+                  {settings.brand_name.split(' ')[0] || 'El Mentor'}
                 </span>
                 <span className="text-xs text-sidebar-foreground/60 -mt-1">
-                  Digital
+                  {settings.brand_name.split(' ').slice(1).join(' ') || 'Digital'}
                 </span>
               </div>
             </Link>
@@ -124,8 +137,17 @@ export function AppLayout({ children }: AppLayoutProps) {
             })}
           </nav>
 
-          {/* Settings */}
-          <div className="p-4 border-t border-sidebar-border">
+          {/* Settings + Admin */}
+          <div className="p-4 border-t border-sidebar-border space-y-1">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
+              >
+                <Shield className="w-5 h-5" />
+                Panel Admin
+              </Link>
+            )}
             <Link
               to="/app/configuracion"
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
