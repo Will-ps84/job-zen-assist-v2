@@ -9,8 +9,22 @@ interface Profile {
   user_id: string;
   full_name: string | null;
   email: string | null;
-  country: string;
-  onboarding_completed: boolean;
+  country: string | null;
+  onboarding_completed: boolean | null;
+  avatar_url: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+  role_target: string | null;
+  seniority: 'junior' | 'mid' | 'senior' | 'lead' | 'director' | 'executive' | null;
+  skills: string[] | null;
+  industries: string[] | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  currency: string | null;
+  availability: string | null;
+  english_level: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
