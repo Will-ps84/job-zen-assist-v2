@@ -12,6 +12,9 @@ import {
   Clock,
   AlertCircle,
   Loader2,
+  MessageSquare,
+  Star,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
@@ -292,18 +295,87 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Quick Actions - Mentor CTAs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer" onClick={() => {}}>
+            <Link to="/app/entrevistas" className="block">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <MessageSquare className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                      Practicar entrevista
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Simula una entrevista y recibe feedback instantáneo
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+
+          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer">
+            <Link to="/app/star" className="block">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                    <Star className="w-6 h-6 text-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                      Documentar logro
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Crea un logro STAR para destacar en entrevistas
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+
+          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer">
+            <Link to="/app/vacantes" className="block">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/20 transition-colors">
+                    <Sparkles className="w-6 h-6 text-success" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                      Agregar vacante
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Analiza tu compatibilidad con una oferta
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+        </div>
+
         {/* Profile Completion */}
         {profileCompletion < 100 && (
-          <Card className="border-border">
+          <Card className="border-border bg-gradient-to-r from-primary/5 to-accent/5">
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row md:items-center gap-6">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground mb-2">
-                    Completa tu perfil para mejor matching
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">
+                      Tu perfil está al {profileCompletion}%
+                    </h3>
+                  </div>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Tu perfil está al {profileCompletion}%. Agrega más información para
-                    aumentar tu puntuación y conseguir mejores matches.
+                    Completa tu perfil para obtener mejores matches con vacantes. 
+                    Un perfil completo aumenta tus probabilidades de encontrar el trabajo ideal.
                   </p>
                   <Progress value={profileCompletion} className="h-2" />
                 </div>

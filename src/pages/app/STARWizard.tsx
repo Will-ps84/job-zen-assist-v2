@@ -45,8 +45,9 @@ const WIZARD_STEPS = [
     question: "¿Cómo llamarías a este logro en una frase corta?",
     mentorTip: "Sé específico. En vez de 'Mejoré ventas', prueba 'Aumenté ventas B2B un 40% en Q2 2024'.",
     placeholder: "Ej: Reduje tiempo de onboarding de 2 semanas a 3 días",
-    validation: (value: string) => value.length >= 10,
-    errorMsg: "El título debe tener al menos 10 caracteres",
+    validation: (value: string) => value.length >= 5,
+    softValidation: (value: string) => value.length >= 10,
+    softMsg: "💡 Un título más descriptivo ayuda a recordar este logro",
   },
   {
     key: "situation",
@@ -54,8 +55,10 @@ const WIZARD_STEPS = [
     question: "¿Cuál era el contexto? ¿Qué problema o reto existía?",
     mentorTip: "Incluye datos concretos: ¿Cuántas personas? ¿Qué presupuesto? ¿Qué deadline? Ejemplo: 'El equipo de 8 personas tenía un backlog de 120 tickets y el SLA estaba en riesgo'.",
     placeholder: "Describe la situación inicial con números y contexto específico...",
-    validation: (value: string) => value.length >= 50,
-    errorMsg: "Describe la situación con más detalle (mínimo 50 caracteres)",
+    validation: (value: string) => value.length >= 20,
+    softValidation: (value: string) => value.length >= 50,
+    softMsg: "💡 Más contexto = mejor historia. ¿Puedes agregar números o detalles?",
+    guidedQuestions: ["¿Cuántas personas había en el equipo?", "¿Cuál era el plazo?", "¿Qué estaba en riesgo?"],
   },
   {
     key: "task",
@@ -63,8 +66,9 @@ const WIZARD_STEPS = [
     question: "¿Cuál era tu responsabilidad específica? ¿Qué se esperaba de ti?",
     mentorTip: "Enfócate en TU rol. ¿Eras líder, colaborador, el responsable directo? ¿Qué meta concreta tenías? Ejemplo: 'Mi responsabilidad era reducir el backlog a 40 tickets en 30 días'.",
     placeholder: "Explica tu rol y la meta que tenías que alcanzar...",
-    validation: (value: string) => value.length >= 30,
-    errorMsg: "Explica tu tarea con más claridad (mínimo 30 caracteres)",
+    validation: (value: string) => value.length >= 15,
+    softValidation: (value: string) => value.length >= 30,
+    softMsg: "💡 Especifica más tu rol y la meta concreta",
   },
   {
     key: "action",
@@ -72,21 +76,24 @@ const WIZARD_STEPS = [
     question: "¿Qué acciones específicas tomaste TÚ?",
     mentorTip: "Usa verbos de acción en primera persona: 'Implementé', 'Diseñé', 'Lideré', 'Negocié'. Evita 'nosotros' - esto es sobre TI. Menciona herramientas o métodos específicos.",
     placeholder: "Lista las acciones concretas que tomaste...",
-    validation: (value: string) => value.length >= 50 && /\b(implementé|diseñé|lideré|creé|desarrollé|analicé|coordiné|negocié|optimicé|automaticé|reduje|aumenté)/i.test(value),
-    errorMsg: "Usa verbos de acción en primera persona (implementé, diseñé, lideré...) y describe al menos 50 caracteres",
+    validation: (value: string) => value.length >= 20,
+    softValidation: (value: string) => value.length >= 50 && /\b(implementé|diseñé|lideré|creé|desarrollé|analicé|coordiné|negocié|optimicé|automaticé|reduje|aumenté)/i.test(value),
+    softMsg: "💡 Usa verbos de acción: implementé, diseñé, lideré, creé...",
   },
   {
     key: "result",
     label: "Resultado",
     question: "¿Cuál fue el impacto medible de tus acciones?",
-    mentorTip: "Los números son OBLIGATORIOS aquí. ¿Cuánto %? ¿Cuántos $? ¿Cuánto tiempo? Ejemplo: 'Reduje costos operativos en $15,000/mes y mejoré el NPS de 45 a 72'.",
+    mentorTip: "Los números son muy importantes aquí. ¿Cuánto %? ¿Cuántos $? ¿Cuánto tiempo? Ejemplo: 'Reduje costos operativos en $15,000/mes y mejoré el NPS de 45 a 72'.",
     placeholder: "Incluye métricas: porcentajes, montos, tiempo ahorrado, clientes impactados...",
-    validation: (value: string) => {
+    validation: (value: string) => value.length >= 15,
+    softValidation: (value: string) => {
       const hasNumbers = /\d+/.test(value);
       const hasMetrics = /(%|dólar|\$|usd|mxn|ars|€|hora|día|semana|mes|año|cliente|usuario|venta|ingreso|ahorro|reducción|aumento|mejora)/i.test(value);
       return value.length >= 30 && hasNumbers && hasMetrics;
     },
-    errorMsg: "IMPORTANTE: Incluye números y métricas específicas (%, $, tiempo, etc.)",
+    softMsg: "💡 Agrega métricas específicas (%, $, tiempo) para destacar más",
+    guidedQuestions: ["¿Qué % de mejora hubo?", "¿Cuánto tiempo ahorraste?", "¿Cuántos clientes/usuarios impactados?"],
   },
   {
     key: "competencies",
@@ -94,8 +101,9 @@ const WIZARD_STEPS = [
     question: "¿Qué competencias demuestra este logro?",
     mentorTip: "Selecciona 2-4 competencias que se evidencian claramente en tu historia. Esto te ayudará a encontrar este logro cuando prepares entrevistas.",
     placeholder: "",
-    validation: (value: string[]) => Array.isArray(value) && value.length >= 1 && value.length <= 4,
-    errorMsg: "Selecciona entre 1 y 4 competencias",
+    validation: (value: string[]) => true, // Always allow to continue
+    softValidation: (value: string[]) => Array.isArray(value) && value.length >= 1 && value.length <= 4,
+    softMsg: "💡 Seleccionar competencias te ayudará a encontrar este logro después",
   },
 ];
 
@@ -122,32 +130,39 @@ export default function STARWizard() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [form, setForm] = useState<StoryForm>(initialForm);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [warnings, setWarnings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [prefillSource, setPrefillSource] = useState<string | null>(null);
 
   const currentStepData = WIZARD_STEPS[currentStep];
   const progress = ((currentStep + 1) / WIZARD_STEPS.length) * 100;
 
-  const validateCurrentStep = (): boolean => {
+  // Check soft validation for suggestions (non-blocking)
+  const checkSoftValidation = () => {
     const step = WIZARD_STEPS[currentStep];
     const value = step.key === "competencies" ? form.competencies : form[step.key as keyof StoryForm];
     const isValid = step.validation(value as never);
+    const isSoftValid = step.softValidation?.(value as never) ?? true;
     
-    if (!isValid) {
-      setErrors({ [step.key]: step.errorMsg });
-      return false;
+    if (isValid && !isSoftValid && step.softMsg) {
+      setWarnings({ [step.key]: step.softMsg });
+    } else {
+      setWarnings({});
     }
     
-    setErrors({});
-    return true;
+    return isValid;
   };
 
   const handleNext = () => {
-    if (!validateCurrentStep()) return;
+    if (!checkSoftValidation()) {
+      toast.error("Por favor completa este campo antes de continuar");
+      return;
+    }
     
     if (currentStep < WIZARD_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
+      setWarnings({});
     } else {
       handleSubmit();
     }
@@ -156,8 +171,18 @@ export default function STARWizard() {
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      setErrors({});
+      setWarnings({});
     }
+  };
+
+  // Open wizard with prefilled data from CV experience
+  const openWithPrefill = (experienceText: string) => {
+    setPrefillSource(experienceText);
+    setForm({
+      ...initialForm,
+      situation: experienceText,
+    });
+    setIsWizardOpen(true);
   };
 
   const handleSubmit = async () => {
@@ -180,8 +205,9 @@ export default function STARWizard() {
     setIsWizardOpen(false);
     setCurrentStep(0);
     setForm(initialForm);
-    setErrors({});
+    setWarnings({});
     setEditingId(null);
+    setPrefillSource(null);
   };
 
   const handleEdit = (story: typeof stories[0]) => {
@@ -329,11 +355,36 @@ export default function STARWizard() {
                   />
                 )}
 
-                {/* Error Message */}
-                {errors[currentStepData.key] && (
-                  <div className="flex items-center gap-2 text-destructive">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm">{errors[currentStepData.key]}</span>
+                {/* Soft Warning Message (non-blocking) */}
+                {warnings[currentStepData.key] && (
+                  <div className="flex items-center gap-2 text-amber-600 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
+                    <Lightbulb className="w-4 h-4 shrink-0" />
+                    <span className="text-sm">{warnings[currentStepData.key]}</span>
+                  </div>
+                )}
+
+                {/* Guided Questions for metrics */}
+                {(currentStepData as any).guidedQuestions && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Preguntas guía:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(currentStepData as any).guidedQuestions.map((q: string, i: number) => (
+                        <Badge 
+                          key={i} 
+                          variant="outline" 
+                          className="cursor-pointer hover:bg-primary/10 text-xs"
+                          onClick={() => {
+                            const currentValue = form[currentStepData.key as keyof StoryForm] as string;
+                            setForm({ 
+                              ...form, 
+                              [currentStepData.key]: currentValue ? `${currentValue}\n${q} ` : `${q} `
+                            });
+                          }}
+                        >
+                          {q}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
