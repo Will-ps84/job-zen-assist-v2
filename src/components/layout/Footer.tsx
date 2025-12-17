@@ -1,27 +1,44 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Briefcase } from "lucide-react";
+import { useCallback } from "react";
+
 const footerLinks = {
-  producto: [{
-    label: "Cómo funciona",
-    href: "/#como-funciona"
-  }, {
-    label: "Precios",
-    href: "/precios"
-  }, {
-    label: "FAQ",
-    href: "/#faq"
-  }],
-  legal: [{
-    label: "Privacidad",
-    href: "/privacidad"
-  }, {
-    label: "Términos",
-    href: "/terminos"
-  }],
-  paises: ["México", "Argentina", "Colombia", "Perú", "Chile"]
+  producto: [
+    { label: "Cómo funciona", href: "/#como-funciona", isAnchor: true },
+    { label: "Precios", href: "/precios", isAnchor: false },
+    { label: "FAQ", href: "/#faq", isAnchor: true },
+  ],
+  legal: [
+    { label: "Privacidad", href: "/privacidad" },
+    { label: "Términos", href: "/terminos" },
+  ],
+  paises: ["México", "Argentina", "Colombia", "Perú", "Chile"],
 };
+
 export function Footer() {
-  return <footer className="bg-sidebar text-sidebar-foreground py-16">
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = useCallback((href: string, isAnchor: boolean) => {
+    if (isAnchor) {
+      const [path, hash] = href.split('#');
+      if (location.pathname === '/' || location.pathname === path) {
+        const element = document.getElementById(hash);
+        element?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        navigate(path || '/');
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          element?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    } else {
+      navigate(href);
+    }
+  }, [location.pathname, navigate]);
+
+  return (
+    <footer className="bg-sidebar text-sidebar-foreground py-16">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
@@ -49,11 +66,16 @@ export function Footer() {
           <div className="text-primary-foreground">
             <h4 className="font-semibold mb-4">Producto</h4>
             <ul className="space-y-3 text-primary-foreground">
-              {footerLinks.producto.map(link => <li key={link.href} className="text-primary-foreground">
-                  <a href={link.href} className="text-sm transition-colors text-primary-foreground">
+              {footerLinks.producto.map((link) => (
+                <li key={link.href} className="text-primary-foreground">
+                  <button
+                    onClick={() => handleNavClick(link.href, link.isAnchor)}
+                    className="text-sm transition-colors text-primary-foreground hover:text-primary-foreground/80 text-left"
+                  >
                     {link.label}
-                  </a>
-                </li>)}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -61,11 +83,16 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-3 text-primary-foreground">
-              {footerLinks.legal.map(link => <li key={link.href}>
-                  <Link to={link.href} className="text-sm transition-colors text-primary-foreground">
+              {footerLinks.legal.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-sm transition-colors text-primary-foreground hover:text-primary-foreground/80"
+                  >
                     {link.label}
                   </Link>
-                </li>)}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -73,11 +100,11 @@ export function Footer() {
           <div className="text-primary-foreground">
             <h4 className="font-semibold mb-4">Países</h4>
             <ul className="space-y-3 text-primary-foreground">
-              {footerLinks.paises.map(pais => <li key={pais} className="text-primary-foreground">
-                  <span className="text-sm text-primary-foreground">
-                    {pais}
-                  </span>
-                </li>)}
+              {footerLinks.paises.map((pais) => (
+                <li key={pais} className="text-primary-foreground">
+                  <span className="text-sm text-primary-foreground">{pais}</span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -96,5 +123,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 }
