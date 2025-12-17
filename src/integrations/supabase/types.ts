@@ -104,6 +104,45 @@ export type Database = {
         }
         Relationships: []
       }
+      job_portals: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          type: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          type?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          type?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           company: string | null
@@ -308,10 +347,85 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category_id: string | null
+          content: string | null
+          country_scope: string[] | null
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          is_published: boolean | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          content?: string | null
+          country_scope?: string[] | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          content?: string | null
+          country_scope?: string[] | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          is_published?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "resource_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resumes: {
         Row: {
           content_json: Json | null
           created_at: string
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
           id: string
           is_master: boolean | null
           name: string
@@ -323,6 +437,10 @@ export type Database = {
         Insert: {
           content_json?: Json | null
           created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
           is_master?: boolean | null
           name?: string
@@ -334,6 +452,10 @@ export type Database = {
         Update: {
           content_json?: Json | null
           created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
           is_master?: boolean | null
           name?: string

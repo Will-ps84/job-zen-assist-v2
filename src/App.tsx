@@ -24,10 +24,15 @@ const STARWizard = lazy(() => import("./pages/app/STARWizard"));
 const Vacantes = lazy(() => import("./pages/app/Vacantes"));
 const Postulaciones = lazy(() => import("./pages/app/Postulaciones"));
 const Analitica = lazy(() => import("./pages/app/Analitica"));
+const Recursos = lazy(() => import("./pages/app/Recursos"));
 
 // Lazy load - admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const BrandSettings = lazy(() => import("./pages/admin/BrandSettings"));
+const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
+const AdminPortals = lazy(() => import("./pages/admin/AdminPortals"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminMetrics = lazy(() => import("./pages/admin/AdminMetrics"));
 
 // Loading fallback
 const PageLoader = () => (
@@ -71,10 +76,15 @@ const App = () => (
               <Route path="/app/vacantes" element={<ProtectedRoute><Vacantes /></ProtectedRoute>} />
               <Route path="/app/postulaciones" element={<ProtectedRoute><Postulaciones /></ProtectedRoute>} />
               <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
+              <Route path="/app/recursos" element={<ProtectedRoute><Recursos /></ProtectedRoute>} />
               
               {/* Admin routes (protected + role checked in component) */}
               <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/brand" element={<ProtectedRoute><BrandSettings /></ProtectedRoute>} />
+              <Route path="/admin/resources" element={<ProtectedRoute><AdminResources /></ProtectedRoute>} />
+              <Route path="/admin/portals" element={<ProtectedRoute><AdminPortals /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+              <Route path="/admin/metrics" element={<ProtectedRoute><AdminMetrics /></ProtectedRoute>} />
               
               {/* Catch-all */}
               <Route path="*" element={<NotFound />} />
