@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
-import type { Tables, TablesInsert, TablesUpdate, Enums } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 type Application = Tables<'applications'>;
 type ApplicationInsert = TablesInsert<'applications'>;
 type ApplicationUpdate = TablesUpdate<'applications'>;
-type ApplicationStatus = Enums<'application_status'>;
 
 export interface ApplicationWithJob extends Application {
   job?: Tables<'jobs'>;
@@ -135,7 +134,7 @@ export function useApplications() {
         await supabase.from('kpi_events').insert({
           user_id: user.id,
           event_type: 'application_moved',
-          meta_json: { status: updates.status, application_id: id }
+          metadata: { status: updates.status, application_id: id }
         });
       }
 
@@ -170,7 +169,7 @@ export function useApplications() {
     }
   };
 
-  const getByStatus = (status: ApplicationStatus) => 
+  const getByStatus = (status: string) => 
     applications.filter(a => a.status === status);
 
   const getStats = () => ({

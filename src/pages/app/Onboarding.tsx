@@ -27,7 +27,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { useResumes } from "@/hooks/useResumes";
-import type { Enums } from "@/integrations/supabase/types";
 
 const steps = [
   { id: 1, title: "Ubicación", icon: Globe },
@@ -76,13 +75,12 @@ export default function Onboarding() {
     country: "",
     roleTarget: "",
     industries: [] as string[],
-    seniority: "" as Enums<'seniority_level'> | "",
+    seniority: "",
     skills: "",
     englishLevel: "",
     salaryMin: "",
     salaryMax: "",
     availability: "",
-    cvFile: null as File | null,
     cvText: "",
     linkedinUrl: "",
   });
@@ -107,7 +105,7 @@ export default function Onboarding() {
           currency: getCurrency(),
           role_target: formData.roleTarget || null,
           industries: formData.industries.length > 0 ? formData.industries : null,
-          seniority: formData.seniority as Enums<'seniority_level'> || null,
+          seniority: formData.seniority || null,
           skills: formData.skills ? formData.skills.split(',').map(s => s.trim()).filter(Boolean) : null,
           english_level: formData.englishLevel || null,
           salary_min: formData.salaryMin ? parseInt(formData.salaryMin) : null,
@@ -120,12 +118,12 @@ export default function Onboarding() {
         if (error) throw error;
 
         // Create master resume if CV was provided
-        if (formData.cvText || formData.cvFile) {
+        if (formData.cvText) {
           await createResume({
-            title: 'CV Maestro',
-            raw_text: formData.cvText || null,
+            name: 'CV Maestro',
+            raw_text: formData.cvText,
             is_master: true,
-          }, formData.cvFile || undefined);
+          });
         }
 
         navigate("/app");
@@ -323,7 +321,7 @@ export default function Onboarding() {
                   <Select
                     value={formData.seniority}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, seniority: value as Enums<'seniority_level'> | "" })
+                      setFormData({ ...formData, seniority: value })
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -380,59 +378,21 @@ export default function Onboarding() {
             <div className="space-y-6">
               <div>
                 <h2 className="font-display text-2xl font-bold text-foreground mb-2">
-                  Sube tu CV actual
+                  Tu CV actual
                 </h2>
                 <p className="text-muted-foreground">
-                  Lo analizaremos para crear tu CV Maestro y aplicar metodología
-                  STAR a tus logros.
+                  Pega el contenido de tu CV para crear tu CV Maestro.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    id="cv-upload"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        cvFile: e.target.files?.[0] || null,
-                      })
-                    }
-                  />
-                  <label htmlFor="cv-upload" className="cursor-pointer">
-                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="font-medium text-foreground mb-1">
-                      {formData.cvFile
-                        ? formData.cvFile.name
-                        : "Arrastra tu CV o haz click para subir"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      PDF o Word, máximo 5MB
-                    </p>
-                  </label>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">
-                      O pega el texto
-                    </span>
-                  </div>
-                </div>
-
                 <Textarea
                   placeholder="Pega aquí el contenido de tu CV..."
                   value={formData.cvText}
                   onChange={(e) =>
                     setFormData({ ...formData, cvText: e.target.value })
                   }
-                  rows={6}
+                  rows={8}
                 />
 
                 <div className="space-y-2">
@@ -478,7 +438,7 @@ export default function Onboarding() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="salaryMax">Salario objetivo (USD/mes)</Label>
+                    <Label htmlFor="salaryMax">Salario deseado (USD/mes)</Label>
                     <Input
                       id="salaryMax"
                       type="number"
@@ -492,7 +452,7 @@ export default function Onboarding() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Disponibilidad para comenzar</Label>
+                  <Label>Disponibilidad</Label>
                   <Select
                     value={formData.availability}
                     onValueChange={(value) =>
@@ -500,14 +460,14 @@ export default function Onboarding() {
                     }
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecciona tu disponibilidad" />
+                      <SelectValue placeholder="¿Cuándo podrías empezar?" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="immediate">Inmediata</SelectItem>
-                      <SelectItem value="2weeks">2 semanas</SelectItem>
-                      <SelectItem value="1month">1 mes</SelectItem>
-                      <SelectItem value="2months">2 meses</SelectItem>
-                      <SelectItem value="negotiable">Negociable</SelectItem>
+                      <SelectItem value="2_weeks">En 2 semanas</SelectItem>
+                      <SelectItem value="1_month">En 1 mes</SelectItem>
+                      <SelectItem value="2_months">En 2 meses</SelectItem>
+                      <SelectItem value="exploring">Solo explorando</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -516,14 +476,14 @@ export default function Onboarding() {
           )}
 
           {/* Navigation */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-border">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
             <Button
               variant="outline"
               onClick={handleBack}
               disabled={currentStep === 1}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Atrás
+              Anterior
             </Button>
             <Button onClick={handleNext} disabled={saving}>
               {saving ? (
@@ -534,11 +494,11 @@ export default function Onboarding() {
               ) : currentStep === steps.length ? (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Comenzar
+                  Completar
                 </>
               ) : (
                 <>
-                  Continuar
+                  Siguiente
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </>
               )}

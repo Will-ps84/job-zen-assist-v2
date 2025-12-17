@@ -38,33 +38,18 @@ export function useResumes() {
     }
   };
 
-  const createResume = async (resumeData: Partial<ResumeInsert>, file?: File) => {
+  const createResume = async (resumeData: Partial<ResumeInsert>) => {
     if (!user) return { error: new Error('No user') };
 
     try {
-      let fileUrl = null;
-
-      // Upload file if provided
-      if (file) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('resumes')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-        fileUrl = uploadData.path;
-      }
-
       const { data, error } = await supabase
         .from('resumes')
         .insert({
           user_id: user.id,
-          title: resumeData.title || 'CV sin título',
+          name: resumeData.name || 'CV sin título',
           raw_text: resumeData.raw_text,
           is_master: resumeData.is_master || false,
-          file_url: fileUrl,
+          content_json: resumeData.content_json,
         })
         .select()
         .single();
@@ -117,14 +102,6 @@ export function useResumes() {
     if (!user) return { error: new Error('No user') };
 
     try {
-      // Get the resume to find file URL
-      const resume = resumes.find(r => r.id === id);
-      
-      // Delete file from storage if exists
-      if (resume?.file_url) {
-        await supabase.storage.from('resumes').remove([resume.file_url]);
-      }
-
       const { error } = await supabase
         .from('resumes')
         .delete()
@@ -145,13 +122,6 @@ export function useResumes() {
 
   const getMasterResume = () => resumes.find(r => r.is_master);
 
-  const getResumeDownloadUrl = async (filePath: string) => {
-    const { data } = await supabase.storage
-      .from('resumes')
-      .createSignedUrl(filePath, 3600); // 1 hour
-    return data?.signedUrl;
-  };
-
   return {
     resumes,
     loading,
@@ -159,7 +129,6 @@ export function useResumes() {
     updateResume,
     deleteResume,
     getMasterResume,
-    getResumeDownloadUrl,
     refetch: fetchResumes
   };
 }
