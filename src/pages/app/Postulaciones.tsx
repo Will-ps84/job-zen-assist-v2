@@ -15,6 +15,8 @@ import {
   Loader2,
   Trash2,
   ArrowRight,
+  Sparkles,
+  Target,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,6 +35,7 @@ import { useApplications, type ApplicationWithJob } from "@/hooks/useApplication
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
+import { NextActionBanner } from "@/components/app/MentorProgress";
 
 const columns = [
   { id: "saved", title: "Guardada", color: "muted" },
@@ -112,6 +115,26 @@ export default function Postulaciones() {
             </div>
           ))}
         </div>
+
+        {/* Mentor Next Action */}
+        {stats.saved > 0 && stats.applied === 0 && (
+          <NextActionBanner
+            icon={<Target className="w-5 h-5" />}
+            title="Siguiente paso: ¡Postúlate!"
+            description={`Tienes ${stats.saved} vacante(s) guardada(s). Es momento de aplicar.`}
+            href="/app/vacantes"
+            ctaLabel="Ver vacantes"
+          />
+        )}
+        {stats.interview > 0 && (
+          <NextActionBanner
+            icon={<MessageSquare className="w-5 h-5" />}
+            title="Prepárate para tu entrevista"
+            description="Practica con el simulador para estar listo"
+            href="/app/entrevistas"
+            ctaLabel="Practicar"
+          />
+        )}
 
         {/* Kanban Board */}
         {applications.length === 0 ? (
