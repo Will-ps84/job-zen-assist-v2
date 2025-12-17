@@ -1,18 +1,41 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Briefcase } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/#como-funciona", label: "Cómo funciona" },
-  { href: "/precios", label: "Precios" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#como-funciona", label: "Cómo funciona", isAnchor: true },
+  { href: "/precios", label: "Precios", isAnchor: false },
+  { href: "/#faq", label: "FAQ", isAnchor: true },
 ];
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNavClick = useCallback((href: string, isAnchor: boolean) => {
+    setIsOpen(false);
+    
+    if (isAnchor) {
+      const [path, hash] = href.split('#');
+      if (location.pathname === '/' || location.pathname === path) {
+        // Same page, scroll to anchor
+        const element = document.getElementById(hash);
+        element?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Navigate to page then scroll
+        navigate(path || '/');
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          element?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    } else {
+      navigate(href);
+    }
+  }, [location.pathname, navigate]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b">
@@ -33,13 +56,13 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <a
+            <button
               key={link.href}
-              href={link.href}
+              onClick={() => handleNavClick(link.href, link.isAnchor)}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {link.label}
-            </a>
+            </button>
           ))}
         </div>
 
@@ -71,14 +94,13 @@ export function Navbar() {
         >
           <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleNavClick(link.href, link.isAnchor)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2 text-left"
               >
                 {link.label}
-              </a>
+              </button>
             ))}
             <hr className="border-border" />
             <div className="flex flex-col gap-2">
