@@ -1,138 +1,81 @@
 import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import {
-  FileText,
-  Target,
-  Send,
+  FileStack,
+  Users,
+  Clock,
   TrendingUp,
   ArrowRight,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  Loader2,
-  MessageSquare,
-  Star,
   Sparkles,
+  Calendar,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useProfile } from "@/hooks/useProfile";
-import { useResumes } from "@/hooks/useResumes";
-import { useApplications } from "@/hooks/useApplications";
-import { useJobs } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
+import { useCVAnalyses } from "@/hooks/useCVAnalyses";
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
-  const { resumes, loading: resumesLoading } = useResumes();
-  const { applications, getStats, loading: appsLoading } = useApplications();
-  const { jobs, getHighMatchJobs, loading: jobsLoading } = useJobs();
+  const { user, profile } = useAuth();
+  const { analyses, loading } = useCVAnalyses();
 
-  const loading = profileLoading || resumesLoading || appsLoading || jobsLoading;
+  // Calculate B2B metrics
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  const thisMonthAnalyses = analyses.filter(a => {
+    const date = new Date(a.created_at);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
 
-  // Calculate stats
-  const appStats = getStats();
-  const highMatchJobs = getHighMatchJobs(85);
-  const interviewRate = appStats.applied > 0 
-    ? Math.round((appStats.interview / appStats.applied) * 100) 
-    : 0;
+  const totalCVsAnalyzed = analyses.reduce((sum, a) => sum + a.total_cvs, 0);
+  const thisMonthCVs = thisMonthAnalyses.reduce((sum, a) => sum + a.total_cvs, 0);
+  
+  // Estimate hours saved: 3 min per CV manual review → 0.05 hours per CV
+  const hoursSaved = Math.round(totalCVsAnalyzed * 0.05);
+  
+  // Processes with recommended candidates
+  const processesWithCandidates = analyses.filter(
+    a => a.top_candidates && a.top_candidates.length > 0
+  ).length;
 
-  // Calculate profile completion
-  const profileFields = [
-    profile?.country,
-    profile?.role_target,
-    profile?.seniority,
-    profile?.skills?.length,
-    profile?.salary_min,
-    profile?.english_level,
-  ];
-  const filledFields = profileFields.filter(Boolean).length;
-  const profileCompletion = Math.round((filledFields / profileFields.length) * 100);
+  const companyName = profile?.full_name || user?.email?.split("@")[0] || "Empresa";
 
   const stats = [
     {
-      title: "Score de Perfil",
-      value: `${profileCompletion}%`,
-      change: profile?.onboarding_completed ? "Onboarding completo" : "Completa tu perfil",
-      icon: Target,
+      title: "Vacantes analizadas",
+      value: thisMonthAnalyses.length.toString(),
+      subtitle: "este mes",
+      icon: FileStack,
       color: "primary",
     },
     {
-      title: "CVs Creados",
-      value: resumes.length.toString(),
-      change: resumes.some(r => r.is_master) ? "CV Maestro activo" : "Crea tu CV Maestro",
-      icon: FileText,
+      title: "CVs analizados",
+      value: thisMonthCVs.toString(),
+      subtitle: `${totalCVsAnalyzed} en total`,
+      icon: Users,
       color: "info",
     },
     {
-      title: "Postulaciones",
-      value: appStats.total.toString(),
-      change: `${appStats.interview} en entrevista`,
-      icon: Send,
+      title: "Horas ahorradas",
+      value: `${hoursSaved}h`,
+      subtitle: "vs filtrado manual",
+      icon: Clock,
       color: "accent",
     },
     {
-      title: "Tasa Entrevistas",
-      value: `${interviewRate}%`,
-      change: `${appStats.interview} de ${appStats.applied} aplicadas`,
+      title: "Procesos con candidatos",
+      value: processesWithCandidates.toString(),
+      subtitle: "con recomendaciones",
       icon: TrendingUp,
       color: "success",
     },
   ];
 
-  // Build pending tasks
-  const pendingTasks = [];
-  
-  if (!profile?.onboarding_completed) {
-    pendingTasks.push({
-      id: 'onboarding',
-      title: "Completar onboarding",
-      description: "Configura tu perfil para mejores matches",
-      type: "warning",
-      action: "/app/onboarding",
-    });
-  }
-  
-  if (!resumes.some(r => r.is_master)) {
-    pendingTasks.push({
-      id: 'master-cv',
-      title: "Crear CV Maestro",
-      description: "Sube tu CV principal para empezar",
-      type: "warning",
-      action: "/app/cv",
-    });
-  }
-
-  if (highMatchJobs.length > 0) {
-    pendingTasks.push({
-      id: 'new-match',
-      title: "Nueva vacante con alto match",
-      description: `${highMatchJobs.length} vacante(s) con ≥85% compatibilidad`,
-      type: "success",
-      action: "/app/vacantes",
-    });
-  }
-
-  const pendingApps = applications.filter(a => a.status === 'applied');
-  if (pendingApps.length > 0) {
-    const oldestApp = pendingApps[pendingApps.length - 1];
-    if (oldestApp.applied_at) {
-      const daysSince = Math.floor((Date.now() - new Date(oldestApp.applied_at).getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSince >= 7) {
-        pendingTasks.push({
-          id: 'followup',
-          title: "Seguimiento pendiente",
-          description: `Han pasado ${daysSince} días desde tu postulación a ${oldestApp.job?.company || 'empresa'}`,
-          type: "info",
-          action: "/app/postulaciones",
-        });
-      }
-    }
-  }
-
-  const userName = profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Usuario';
+  // Recent analyses for quick access
+  const recentAnalyses = analyses.slice(0, 5);
 
   if (loading) {
     return (
@@ -148,15 +91,23 @@ export default function Dashboard() {
     <AppLayout>
       <div className="space-y-8">
         {/* Welcome */}
-        <div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
-            ¡Hola, {userName}! 👋
-          </h1>
-          <p className="text-muted-foreground">
-            {appStats.interview > 0 
-              ? "Tu progreso esta semana se ve prometedor. Sigue así."
-              : "Empieza agregando vacantes y postulándote."}
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
+              ¡Hola, {companyName}! 👋
+            </h1>
+            <p className="text-muted-foreground">
+              {analyses.length > 0
+                ? "Continúa analizando CVs y encontrando el mejor talento."
+                : "Empieza subiendo CVs y analizando candidatos para tus vacantes."}
+            </p>
+          </div>
+          <Button size="lg" asChild className="shrink-0">
+            <Link to="/app/screener">
+              <Sparkles className="w-5 h-5 mr-2" />
+              Nuevo análisis de CVs
+            </Link>
+          </Button>
         </div>
 
         {/* Stats Grid */}
@@ -173,7 +124,7 @@ export default function Dashboard() {
                       {stat.value}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {stat.change}
+                      {stat.subtitle}
                     </p>
                   </div>
                   <div
@@ -181,10 +132,10 @@ export default function Dashboard() {
                       stat.color === "primary"
                         ? "bg-primary/10 text-primary"
                         : stat.color === "info"
-                        ? "bg-info/10 text-info"
+                        ? "bg-blue-500/10 text-blue-500"
                         : stat.color === "accent"
-                        ? "bg-accent/10 text-accent"
-                        : "bg-success/10 text-success"
+                        ? "bg-purple-500/10 text-purple-500"
+                        : "bg-green-500/10 text-green-500"
                     }`}
                   >
                     <stat.icon className="w-6 h-6" />
@@ -196,199 +147,139 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Pending Tasks */}
+          {/* Quick Actions */}
           <Card className="lg:col-span-1 border-border">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" />
-                Tareas pendientes
+                <Sparkles className="w-5 h-5 text-primary" />
+                Acciones rápidas
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {pendingTasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  ¡Todo al día! 🎉
-                </p>
-              ) : (
-                pendingTasks.slice(0, 5).map((task) => (
-                  <Link
-                    key={task.id}
-                    to={task.action}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
-                  >
-                    {task.type === "warning" ? (
-                      <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-                    ) : task.type === "success" ? (
-                      <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-info shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {task.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {task.description}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </Link>
-                ))
-              )}
+            <CardContent className="space-y-3">
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link to="/app/screener">
+                  <FileStack className="w-4 h-4 mr-2" />
+                  Analizar nuevos CVs
+                  <ArrowRight className="w-4 h-4 ml-auto" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link to="/app/screener/history">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Ver historial de procesos
+                  <ArrowRight className="w-4 h-4 ml-auto" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link to="/app/configuracion">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Gestionar facturación
+                  <ArrowRight className="w-4 h-4 ml-auto" />
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
-          {/* Recent Matches */}
+          {/* Recent Processes */}
           <Card className="lg:col-span-2 border-border">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="w-5 h-5 text-primary" />
-                Vacantes con alto match
+                <FileStack className="w-5 h-5 text-primary" />
+                Procesos recientes
               </CardTitle>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/app/vacantes">
-                  Ver todas
+                <Link to="/app/screener/history">
+                  Ver todos
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Link>
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {highMatchJobs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Target className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      No tienes vacantes con alto match aún
-                    </p>
-                    <Button asChild>
-                      <Link to="/app/vacantes">Agregar vacante</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  highMatchJobs.slice(0, 3).map((job) => (
+              {recentAnalyses.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileStack className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Aún no has analizado ninguna vacante
+                  </p>
+                  <Button asChild>
+                    <Link to="/app/screener">Iniciar primer análisis</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recentAnalyses.map((analysis) => (
                     <div
-                      key={job.id}
+                      key={analysis.id}
                       className="flex items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/30 transition-colors"
                     >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground">{job.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {job.company}
-                        </p>
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-primary">
-                            {job.match?.score_total || 0}%
-                          </p>
-                          <p className="text-xs text-muted-foreground">match</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">
+                          {analysis.job_title}
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="w-3.5 h-3.5" />
+                          <span>{analysis.total_cvs} CVs</span>
+                          <span className="text-muted-foreground/50">•</span>
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>
+                            {new Date(analysis.created_at).toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short'
+                            })}
+                          </span>
                         </div>
-                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success">
-                          Alto match
-                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {analysis.top_candidates && analysis.top_candidates[0] && (
+                          <Badge 
+                            variant={analysis.top_candidates[0].score >= 85 ? "default" : "secondary"}
+                            className="shrink-0"
+                          >
+                            Top: {analysis.top_candidates[0].score}%
+                          </Badge>
+                        )}
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to="/app/screener/history">
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </Button>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions - Mentor CTAs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer" onClick={() => {}}>
-            <Link to="/app/entrevistas" className="block">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <MessageSquare className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      Practicar entrevista
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Simula una entrevista y recibe feedback instantáneo
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* CTA Banner */}
+        <Card className="border-border bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
+          <CardContent className="py-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-foreground">
+                    Analiza CVs en segundos con IA
+                  </h3>
                 </div>
-              </CardContent>
-            </Link>
-          </Card>
-
-          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer">
-            <Link to="/app/star" className="block">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Star className="w-6 h-6 text-accent" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      Documentar logro
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Crea un logro STAR para destacar en entrevistas
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
-
-          <Card className="border-border hover:border-primary/30 transition-colors group cursor-pointer">
-            <Link to="/app/vacantes" className="block">
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:bg-success/20 transition-colors">
-                    <Sparkles className="w-6 h-6 text-success" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      Agregar vacante
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Analiza tu compatibilidad con una oferta
-                    </p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
-        </div>
-
-        {/* Profile Completion */}
-        {profileCompletion < 100 && (
-          <Card className="border-border bg-gradient-to-r from-primary/5 to-accent/5">
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground">
-                      Tu perfil está al {profileCompletion}%
-                    </h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Completa tu perfil para obtener mejores matches con vacantes. 
-                    Un perfil completo aumenta tus probabilidades de encontrar el trabajo ideal.
-                  </p>
-                  <Progress value={profileCompletion} className="h-2" />
-                </div>
-                <Button asChild>
-                  <Link to="/app/onboarding">
-                    Completar perfil
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Sube hasta 100 CVs en un ZIP, pega la descripción del puesto y obtén el 
+                  Top 5 candidatos rankeados con logros STAR y score de compatibilidad.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <Button size="lg" asChild>
+                <Link to="/app/screener">
+                  <FileStack className="w-5 h-5 mr-2" />
+                  Nuevo análisis
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

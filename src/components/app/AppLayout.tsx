@@ -34,16 +34,17 @@ import { useBrandSettings } from "@/hooks/useBrandSettings";
 import { toast } from "@/hooks/use-toast";
 import { FeedbackButton } from "./FeedbackButton";
 
+// B2B Navigation for recruiters
 const navItems = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/app/perfil", label: "Perfil & Objetivos", icon: User },
-  { href: "/app/cv", label: "CV Maestro", icon: FileText },
+  { href: "/app/screener", label: "Análisis de CVs", icon: FileText },
+  { href: "/app/screener/history", label: "Historial de Procesos", icon: Kanban },
+];
+
+// Admin-only items (kept for internal tools)
+const adminOnlyItems = [
   { href: "/app/star", label: "STAR Wizard", icon: Star },
-  { href: "/app/vacantes", label: "Vacantes", icon: Target },
-  { href: "/app/postulaciones", label: "Postulaciones", icon: Kanban },
-  { href: "/app/entrevistas", label: "Simulador", icon: MessageSquare },
-  { href: "/app/analitica", label: "Analítica", icon: BarChart3 },
-  { href: "/app/recursos", label: "Recursos", icon: BookOpen },
+  { href: "/app/vacantes", label: "Vacantes (Legacy)", icon: Target },
 ];
 
 interface AppLayoutProps {
@@ -140,14 +141,39 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Settings + Admin */}
           <div className="p-4 border-t border-sidebar-border space-y-1">
+            {/* Admin-only legacy tools */}
             {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
-              >
-                <Shield className="w-5 h-5" />
-                Panel Admin
-              </Link>
+              <>
+                <div className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider">
+                  Herramientas Admin
+                </div>
+                {adminOnlyItems.map((item) => {
+                  const isActive = location.pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setSidebarOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-amber-500/10 text-amber-500"
+                          : "text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      )}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-amber-500 hover:bg-amber-500/10 transition-colors"
+                >
+                  <Shield className="w-5 h-5" />
+                  Panel Admin
+                </Link>
+              </>
             )}
             <Link
               to="/app/configuracion"
@@ -201,10 +227,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/app/perfil">Mi perfil</Link>
+                    <Link to="/app/configuracion">Mi cuenta</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/app/configuracion">Configuración</Link>
+                    <Link to="/app/configuracion">Facturación</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
