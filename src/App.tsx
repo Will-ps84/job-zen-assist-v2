@@ -27,6 +27,7 @@ const Analitica = lazy(() => import("./pages/app/Analitica"));
 const Recursos = lazy(() => import("./pages/app/Recursos"));
 const InterviewSimulator = lazy(() => import("./pages/app/InterviewSimulator"));
 const ScreenerFlow = lazy(() => import("./pages/app/ScreenerFlow"));
+const ScreenerHistory = lazy(() => import("./pages/app/ScreenerHistory"));
 
 // Lazy load - admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -81,6 +82,7 @@ const App = () => (
               <Route path="/app/postulaciones" element={<ProtectedRoute><Postulaciones /></ProtectedRoute>} />
               <Route path="/app/entrevistas" element={<ProtectedRoute><InterviewSimulator /></ProtectedRoute>} />
               <Route path="/app/screener" element={<ProtectedRoute><ScreenerFlow /></ProtectedRoute>} />
+              <Route path="/app/screener/history" element={<ProtectedRoute><ScreenerHistory /></ProtectedRoute>} />
               <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
               <Route path="/app/recursos" element={<ProtectedRoute><Recursos /></ProtectedRoute>} />
               

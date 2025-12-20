@@ -25,9 +25,11 @@ interface ExtractedFile {
 interface CVUploadZoneProps {
   onFilesExtracted: (files: ExtractedFile[]) => void;
   isProcessing: boolean;
+  maxFiles?: number;
+  maxSizeMB?: number;
 }
 
-export function CVUploadZone({ onFilesExtracted, isProcessing }: CVUploadZoneProps) {
+export function CVUploadZone({ onFilesExtracted, isProcessing, maxFiles = 100, maxSizeMB = 50 }: CVUploadZoneProps) {
   const [extracting, setExtracting] = useState(false);
   const [extractionProgress, setExtractionProgress] = useState(0);
   const [extractedFiles, setExtractedFiles] = useState<ExtractedFile[]>([]);
@@ -80,8 +82,8 @@ export function CVUploadZone({ onFilesExtracted, isProcessing }: CVUploadZonePro
         return;
       }
 
-      if (pdfFiles.length > 200) {
-        setError("Máximo 200 CVs por análisis. Tu ZIP tiene " + pdfFiles.length);
+      if (pdfFiles.length > maxFiles) {
+        setError(`Máximo ${maxFiles} CVs por análisis. Tu ZIP tiene ${pdfFiles.length}`);
         setExtracting(false);
         return;
       }
@@ -200,7 +202,7 @@ export function CVUploadZone({ onFilesExtracted, isProcessing }: CVUploadZonePro
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Máx. 200 CVs en formato PDF
+                    Máx. {maxFiles} CVs en formato PDF · Hasta {maxSizeMB}MB
                   </p>
                 </div>
               )}
