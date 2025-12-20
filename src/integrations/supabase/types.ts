@@ -104,6 +104,45 @@ export type Database = {
         }
         Relationships: []
       }
+      cv_analyses: {
+        Row: {
+          created_at: string
+          id: string
+          job_description: string
+          job_title: string
+          pool_quality_comment: string | null
+          role_category: string | null
+          top_candidates: Json | null
+          total_cvs: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_description: string
+          job_title: string
+          pool_quality_comment?: string | null
+          role_category?: string | null
+          top_candidates?: Json | null
+          total_cvs?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_description?: string
+          job_title?: string
+          pool_quality_comment?: string | null
+          role_category?: string | null
+          top_candidates?: Json | null
+          total_cvs?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           comment: string
