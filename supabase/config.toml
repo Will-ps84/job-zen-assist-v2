@@ -1,1 +1,7 @@
 project_id = "olzwgallpissgwwvmqhe"
+
+[functions.analyze-job-demo]
+verify_jwt = false
+
+[functions.analyze-cvs]
+verify_jwt = true
