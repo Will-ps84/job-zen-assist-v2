@@ -1,54 +1,54 @@
 import { 
   Brain, 
-  FileCheck, 
+  FileStack, 
   Target, 
-  Kanban, 
-  MessageSquare, 
   BarChart, 
+  Mail, 
   Shield, 
-  Globe 
+  Globe,
+  Zap 
 } from "lucide-react";
 
 const features = [
   {
-    icon: FileCheck,
-    title: "CV Maestro + Versiones",
-    description: "Un CV base optimizado que se adapta automáticamente a cada vacante específica.",
+    icon: FileStack,
+    title: "Bulk Upload CVs",
+    description: "Sube ZIPs de hasta 200 CVs de cualquier portal: Bumeran, Computrabajo, Indeed, LinkedIn.",
   },
   {
     icon: Brain,
-    title: "Motor STAR Guiado",
-    description: "Preguntas inteligentes para transformar tus responsabilidades en logros cuantificables.",
+    title: "Análisis STAR Automático",
+    description: "La IA identifica Situation-Task-Action-Result en cada experiencia laboral del candidato.",
   },
   {
     icon: Target,
     title: "Matching Semántico",
-    description: "Embeddings + IA para encontrar solo vacantes con ≥90% de compatibilidad real.",
-  },
-  {
-    icon: Kanban,
-    title: "Pipeline de Postulaciones",
-    description: "Kanban visual para seguir cada oportunidad: Guardada → Aplicada → Entrevista → Oferta.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Simulador de Entrevistas",
-    description: "Practica con preguntas típicas y recibe feedback estructurado para mejorar.",
+    description: "No solo keywords: entendemos contexto para encontrar candidatos que realmente encajan.",
   },
   {
     icon: BarChart,
-    title: "Analítica Personal",
-    description: "KPIs de tu campaña: tasa de entrevistas, eficacia por canal, tiempo promedio.",
+    title: "Ranking con Explicación",
+    description: "Score 0-100 con desglose: por qué cada candidato sube o baja en el ranking.",
+  },
+  {
+    icon: Mail,
+    title: "Emails Automatizados",
+    description: "Contacta a tu Top 5 con un click. Templates personalizables por puesto.",
+  },
+  {
+    icon: Zap,
+    title: "Velocidad 95% Mayor",
+    description: "Lo que antes tomaba 4 horas de filtrado manual, ahora son 2 minutos.",
   },
   {
     icon: Shield,
-    title: "IA Explicable (XAI)",
-    description: "Cada sugerencia incluye el 'porqué' estratégico. Entiendes y aprendes.",
+    title: "Datos Seguros",
+    description: "Encriptación enterprise. Cumplimiento GDPR. Los CVs se borran tras 30 días.",
   },
   {
     icon: Globe,
     title: "Multi-país LATAM",
-    description: "México, Argentina, Colombia, Perú y Chile con portales y plantillas locales.",
+    description: "Optimizado para México, Argentina, Colombia, Perú y Chile. Portales locales incluidos.",
   },
 ];
 
@@ -62,11 +62,11 @@ export function FeaturesSection() {
             Funcionalidades
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Todo lo que necesitas para conseguir tu trabajo ideal
+            Todo lo que necesita tu equipo de HR
           </h2>
           <p className="text-muted-foreground">
-            Herramientas potentes diseñadas para profesionales que buscan
-            resultados, no solo postulaciones.
+            Herramientas potentes diseñadas para PYMEs que necesitan 
+            contratar rápido sin perder calidad.
           </p>
         </div>
 

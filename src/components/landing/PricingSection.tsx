@@ -1,63 +1,65 @@
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles, Crown, Rocket } from "lucide-react";
+import { Check, Sparkles, Rocket, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const plans = [
   {
-    id: "free",
-    name: "Explorador",
-    description: "Para comenzar tu transformación profesional",
+    id: "trial",
+    name: "Free Trial",
+    description: "Prueba el poder del HR Screener",
     price: "Gratis",
-    priceNote: "sin costo",
+    priceNote: "7 días",
     icon: Sparkles,
     features: [
-      "Diagnóstico de perfil completo",
-      "1 CV optimizado (con marca de agua)",
-      "Motor STAR: 5 logros/mes",
-      "Matching: 10 vacantes/mes",
-      "Score ATS básico",
+      "50 CVs procesados",
+      "1 job description activo",
+      "Top 5 con análisis STAR",
+      "Export PDF básico",
+      "Soporte por email",
     ],
-    cta: "Comenzar gratis",
+    cta: "Comenzar prueba gratis",
     variant: "outline" as const,
     popular: false,
   },
   {
-    id: "premium",
-    name: "Estratega",
-    description: "Para quien busca activamente y quiere resultados",
-    price: "$9.99",
+    id: "starter",
+    name: "Starter",
+    description: "Para PYMEs con contratación ocasional",
+    price: "$49",
     priceNote: "USD/mes",
     icon: Rocket,
     features: [
-      "Todo de Explorador +",
-      "Motor STAR ilimitado",
-      "CV sin marca de agua",
-      "Matching: 200 vacantes/mes",
-      "Adaptación multi-vacante",
-      "Simulador de entrevistas",
+      "500 CVs/mes",
+      "5 jobs simultáneos",
+      "Análisis STAR completo",
+      "Ranking explicado con IA",
       "Export PDF profesional",
+      "Historial 3 meses",
+      "Soporte prioritario",
     ],
-    cta: "Elegir Estratega",
+    cta: "Elegir Starter",
     variant: "default" as const,
     popular: true,
   },
   {
-    id: "vip",
-    name: "Copiloto",
-    description: "Máxima prioridad y herramientas avanzadas",
-    price: "$24.99",
+    id: "growth",
+    name: "Growth",
+    description: "Para equipos de HR con alto volumen",
+    price: "$99",
     priceNote: "USD/mes",
     icon: Crown,
     features: [
-      "Todo de Estratega +",
-      "Priorización de alertas",
-      "Plantillas por industria",
-      "Simulador avanzado",
-      "Reporte mensual PDF",
-      "Soporte prioritario",
+      "2,000 CVs/mes",
+      "Jobs ilimitados",
+      "API access",
+      "Emails automatizados",
+      "Múltiples usuarios",
+      "Historial ilimitado",
+      "Soporte dedicado",
+      "Onboarding personalizado",
     ],
-    cta: "Elegir Copiloto",
+    cta: "Elegir Growth",
     variant: "accent" as const,
     popular: false,
   },
@@ -73,11 +75,11 @@ export function PricingSection() {
             Precios
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Invierte en tu futuro profesional
+            Ahorra tiempo = Ahorra dinero
           </h2>
           <p className="text-muted-foreground">
-            Planes diseñados para cada etapa de tu búsqueda. Comienza gratis y
-            escala cuando lo necesites.
+            Planes diseñados para el tamaño de tu operación de HR.
+            ROI positivo desde el primer mes.
           </p>
         </div>
 
@@ -158,7 +160,7 @@ export function PricingSection() {
         {/* Trust note */}
         <p className="text-center text-sm text-muted-foreground mt-10">
           Precios en USD. Acepta pago en moneda local (MXN, ARS, COP, PEN, CLP).
-          Cancela cuando quieras.
+          Cancela cuando quieras. Garantía de devolución 30 días.
         </p>
       </div>
     </section>

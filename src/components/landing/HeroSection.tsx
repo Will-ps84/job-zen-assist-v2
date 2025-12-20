@@ -1,22 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Sparkles, Target, TrendingUp, Users } from "lucide-react";
-import { useBrandSettings } from "@/hooks/useBrandSettings";
+import { ArrowRight, CheckCircle2, Clock, Users, Zap, FileStack } from "lucide-react";
 
 const benefits = [
-  "Optimización ATS inteligente",
-  "Match semántico ≥90%",
-  "Metodología STAR guiada",
+  "Filtra 200+ CVs en minutos",
+  "Análisis STAR automático",
+  "Ranking IA con explicación",
 ];
 
 export function HeroSection() {
-  const { settings } = useBrandSettings();
-
   return (
     <section className="relative min-h-screen gradient-hero overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl animate-pulse-slow" />
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-slow delay-500" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-primary-foreground/5 rounded-full" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-primary-foreground/5 rounded-full" />
@@ -26,26 +23,26 @@ export function HeroSection() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 mb-8 animate-fade-in">
-            <Sparkles className="w-4 h-4 text-accent" />
+            <Zap className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-primary-foreground">
-              {settings.slogan}
+              Reclutamiento inteligente para PYMEs LATAM
             </span>
           </div>
 
           {/* Headline */}
           <h1 className="font-display font-bold text-primary-foreground leading-[1.1] mb-6 animate-slide-up text-[clamp(2rem,5vw,3.75rem)]">
-            <span className="block">De la postulación manual</span>
+            <span className="block">De 200 CVs desordenados</span>
             <span className="block mt-2">
-              a la{" "}
-              <span className="text-underline-accent">estrategia IA</span>
+              a{" "}
+              <span className="text-underline-accent">Top 5 candidatos</span>
+              {" "}en 2 min
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8 animate-slide-up delay-100">
-            Transforma tu búsqueda de empleo con optimización de CV inteligente,
-            matching de alto umbral y postulación asistida. {settings.brand_name}{" "}
-            te guía para conseguir el trabajo que mereces.
+            Sube el ZIP de CVs de Bumeran/Computrabajo + pega el job description. 
+            Nuestra IA rankea candidatos con análisis STAR y score de compatibilidad.
           </p>
 
           {/* Benefits */}
@@ -65,7 +62,7 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-300">
             <Button size="xl" variant="accent" asChild>
               <Link to="/registro">
-                Comenzar gratis
+                Prueba Gratis 7 días
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
@@ -73,20 +70,20 @@ export function HeroSection() {
               size="xl"
               variant="hero-outline"
               onClick={() => {
-                const element = document.getElementById('como-funciona');
+                const element = document.getElementById('demo');
                 element?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              Ver cómo funciona
+              Ver demo sin registro
             </Button>
           </div>
 
           {/* Trust badges */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 animate-fade-in delay-500">
-            <StatCard icon={Users} value="5,000+" label="Profesionales" />
-            <StatCard icon={Target} value="90%+" label="Match Score" />
-            <StatCard icon={TrendingUp} value="3x" label="Más entrevistas" />
-            <StatCard icon={CheckCircle2} value="5" label="Países LATAM" />
+            <StatCard icon={Clock} value="95%" label="Tiempo ahorrado" />
+            <StatCard icon={Users} value="500+" label="PYMEs LATAM" />
+            <StatCard icon={FileStack} value="50K+" label="CVs procesados" />
+            <StatCard icon={CheckCircle2} value="5" label="Países" />
           </div>
         </div>
       </div>

@@ -1,11 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Briefcase } from "lucide-react";
+import { Menu, X, FileStack } from "lucide-react";
 import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { useBrandSettings } from "@/hooks/useBrandSettings";
 
 const navLinks = [
+  { href: "/#demo", label: "Demo", isAnchor: true },
   { href: "/#como-funciona", label: "Cómo funciona", isAnchor: true },
   { href: "/precios", label: "Precios", isAnchor: false },
   { href: "/#faq", label: "FAQ", isAnchor: true },
@@ -15,7 +15,6 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { settings } = useBrandSettings();
 
   const handleNavClick = useCallback((href: string, isAnchor: boolean) => {
     setIsOpen(false);
@@ -42,23 +41,15 @@ export function Navbar() {
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          {settings.logo_url ? (
-            <img 
-              src={settings.logo_url} 
-              alt={settings.brand_name} 
-              className="w-10 h-10 rounded-xl object-contain"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <Briefcase className="w-5 h-5 text-primary-foreground" />
-            </div>
-          )}
+          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+            <FileStack className="w-5 h-5 text-primary-foreground" />
+          </div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-lg leading-tight text-foreground">
-              {settings.brand_name.split(' ')[0] || 'El Mentor'}
+              HR Screener
             </span>
             <span className="text-xs text-muted-foreground -mt-1">
-              {settings.brand_name.split(' ').slice(1).join(' ') || 'Digital'}
+              LATAM
             </span>
           </div>
         </Link>
@@ -82,7 +73,7 @@ export function Navbar() {
             <Link to="/login">Iniciar sesión</Link>
           </Button>
           <Button asChild>
-            <Link to="/registro">Comenzar gratis</Link>
+            <Link to="/registro">Prueba gratis</Link>
           </Button>
         </div>
 
@@ -118,7 +109,7 @@ export function Navbar() {
                 <Link to="/login">Iniciar sesión</Link>
               </Button>
               <Button asChild>
-                <Link to="/registro">Comenzar gratis</Link>
+                <Link to="/registro">Prueba gratis</Link>
               </Button>
             </div>
           </div>
