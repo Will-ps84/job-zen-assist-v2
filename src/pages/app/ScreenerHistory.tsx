@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   FileStack,
-  ArrowLeft,
+  Plus,
   Eye,
   Trash2,
   Download,
@@ -78,42 +79,24 @@ export default function ScreenerHistory() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <FileStack className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="font-display font-bold text-lg text-foreground">
-                HR Screener
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">LATAM</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" asChild>
-              <Link to="/app/screener">
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Nuevo Análisis
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-8">
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-              Historial de Análisis
+    <AppLayout>
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Historial de Procesos
             </h1>
             <p className="text-muted-foreground">
               Revisa y descarga tus análisis anteriores de CVs
             </p>
           </div>
+          <Button asChild className="shrink-0">
+            <Link to="/app/screener">
+              <Plus className="w-4 h-4 mr-1" />
+              Nuevo Análisis
+            </Link>
+          </Button>
+        </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-20">
@@ -226,15 +209,14 @@ export default function ScreenerHistory() {
             </Card>
           )}
         </div>
-      </main>
 
-      {/* Detail Modal */}
-      <Dialog open={!!selectedAnalysis} onOpenChange={() => setSelectedAnalysis(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileStack className="w-5 h-5 text-primary" />
-              {selectedAnalysis?.job_title}
+        {/* Detail Modal */}
+        <Dialog open={!!selectedAnalysis} onOpenChange={() => setSelectedAnalysis(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileStack className="w-5 h-5 text-primary" />
+                {selectedAnalysis?.job_title}
             </DialogTitle>
           </DialogHeader>
 
@@ -330,6 +312,6 @@ export default function ScreenerHistory() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </AppLayout>
   );
 }

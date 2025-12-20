@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AppLayout } from "@/components/app/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +23,6 @@ import {
   Download,
   ArrowRight,
   FileStack,
-  Eye,
   Mail,
   Phone,
   History,
@@ -257,68 +257,46 @@ export default function ScreenerFlow() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <FileStack className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="font-display font-bold text-lg text-foreground">
-                HR Screener
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">LATAM</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/app/screener/history">
-                <History className="w-4 h-4 mr-1" />
-                Historial ({analyses.length})
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/app">Dashboard</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Page Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+    <AppLayout>
+      <div className="max-w-6xl mx-auto">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-2">
               Análisis de CVs con IA
             </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Sube hasta 100 CVs en un ZIP, pega el job description y obtén el Top 5
-              candidatos con scores y logros STAR en menos de 2 minutos.
+            <p className="text-muted-foreground">
+              Sube hasta 100 CVs, pega la descripción del puesto y obtén el Top 5 candidatos.
             </p>
           </div>
+          <Button variant="outline" size="sm" asChild className="shrink-0">
+            <Link to="/app/screener/history">
+              <History className="w-4 h-4 mr-1" />
+              Historial ({analyses.length})
+            </Link>
+          </Button>
+        </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left Column: Inputs */}
-            <div className="space-y-6">
-              {/* CV Upload */}
-              <CVUploadZone
-                onFilesExtracted={handleFilesExtracted}
-                isProcessing={isAnalyzing}
-                maxFiles={100}
-                maxSizeMB={50}
-              />
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left Column: Inputs */}
+          <div className="space-y-6">
+            {/* CV Upload */}
+            <CVUploadZone
+              onFilesExtracted={handleFilesExtracted}
+              isProcessing={isAnalyzing}
+              maxFiles={100}
+              maxSizeMB={50}
+            />
 
-              {/* Role Category */}
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Target className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground">
-                      Categoría del Rol
-                    </h3>
-                  </div>
+            {/* Role Category */}
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-foreground">
+                    Categoría del Rol
+                  </h3>
+                </div>
                   <Select value={roleCategory} onValueChange={setRoleCategory} disabled={isAnalyzing}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona una categoría" />
@@ -585,7 +563,7 @@ Incluye:
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
