@@ -7,34 +7,39 @@ import {
 
 const faqs = [
   {
-    question: "¿Qué diferencia a El Mentor Digital de otras herramientas de CV?",
+    question: "¿Cómo funciona el análisis de CVs?",
     answer:
-      "No solo optimizamos tu CV, te enseñamos a pensar estratégicamente. Nuestro Motor STAR guiado te hace preguntas para extraer logros cuantificables reales, y cada sugerencia de IA incluye el 'porqué' para que aprendas mientras mejoras.",
+      "Subes un ZIP con los CVs descargados de Bumeran, Computrabajo o cualquier portal. Nuestra IA extrae texto, identifica skills, experiencia y logros STAR. Luego compara contra tu job description y rankea los candidatos por compatibilidad.",
   },
   {
-    question: "¿Cómo funciona el matching semántico del 90%?",
+    question: "¿Qué es el análisis STAR automático?",
     answer:
-      "Usamos embeddings de IA para analizar profundamente tu perfil y cada vacante. Solo te mostramos oportunidades donde hay una compatibilidad real de skills, seniority y expectativas. Nada de spam de vacantes irrelevantes.",
+      "STAR significa Situation-Task-Action-Result. Nuestra IA identifica en cada experiencia laboral del candidato estos 4 elementos para darte una visión clara de logros concretos, no solo responsabilidades genéricas.",
   },
   {
-    question: "¿La postulación es automática?",
+    question: "¿Cuántos CVs puedo analizar?",
     answer:
-      "No. Preparamos todo el paquete (CV adaptado, cover letter, respuestas sugeridas), pero tú decides cuándo y dónde aplicar. Creemos en el control total del candidato, no en el spam masivo.",
+      "El trial gratuito permite 50 CVs. El plan Starter ($49/mes) incluye 500 CVs/mes. El plan Growth ($99/mes) sube a 2,000 CVs/mes. Para volúmenes mayores, contáctanos.",
   },
   {
-    question: "¿Funciona para mi país?",
+    question: "¿Funciona para cualquier tipo de puesto?",
     answer:
-      "Sí. Actualmente soportamos México, Argentina, Colombia, Perú y Chile con portales de empleo locales, plantillas adaptadas y precios en moneda local.",
+      "Sí. El sistema está optimizado para perfiles técnicos (desarrolladores, data, etc.), comerciales, administrativos y operativos. La IA se adapta al lenguaje y requisitos de cada industria.",
   },
   {
-    question: "¿Puedo probar gratis antes de pagar?",
+    question: "¿Qué portales de empleo soportan?",
     answer:
-      "Por supuesto. El plan Explorador es completamente gratis y te permite diagnosticar tu perfil, crear un CV optimizado y probar el Motor STAR con hasta 5 logros al mes.",
+      "Cualquier portal que permita descargar CVs en PDF. Los más comunes en LATAM: Bumeran, Computrabajo, Indeed, LinkedIn, OCC Mundial, Zona Jobs, entre otros.",
   },
   {
-    question: "¿Mis datos están seguros?",
+    question: "¿Mis datos y los CVs están seguros?",
     answer:
-      "Tu privacidad es prioridad. Usamos encriptación, Row Level Security en base de datos (solo tú ves tus datos), y nunca compartimos tu información con terceros sin tu consentimiento explícito.",
+      "Absolutamente. Usamos encriptación enterprise, servidores en AWS, y cumplimos GDPR. Los CVs se eliminan automáticamente 30 días después del análisis. Nunca compartimos datos con terceros.",
+  },
+  {
+    question: "¿Puedo cancelar en cualquier momento?",
+    answer:
+      "Sí, sin penalidad. Cancela desde tu dashboard y mantendrás acceso hasta el fin del período pagado. Ofrecemos garantía de devolución de 30 días si no estás satisfecho.",
   },
 ];
 
@@ -51,8 +56,7 @@ export function FAQSection() {
             Preguntas frecuentes
           </h2>
           <p className="text-muted-foreground">
-            Todo lo que necesitas saber antes de comenzar tu transformación
-            profesional.
+            Todo lo que necesitas saber sobre HR Screener LATAM.
           </p>
         </div>
 

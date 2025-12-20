@@ -1,36 +1,36 @@
-import { FileText, Search, Send, BarChart3, ArrowRight } from "lucide-react";
+import { Upload, FileText, BarChart3, Mail, ArrowRight } from "lucide-react";
 
 const steps = [
   {
-    icon: FileText,
+    icon: Upload,
     number: "01",
-    title: "Optimización Proactiva del CV",
+    title: "Sube el ZIP de CVs",
     description:
-      "La IA analiza y adapta tu CV para superar los filtros ATS de cada oferta específica. Metodología STAR guiada para logros cuantificables.",
+      "Arrastra el archivo ZIP descargado de Bumeran, Computrabajo o Indeed. Soportamos hasta 200 CVs por análisis.",
     color: "primary",
   },
   {
-    icon: Search,
+    icon: FileText,
     number: "02",
-    title: "Búsqueda y Filtro de Alto Umbral",
+    title: "Pega el Job Description",
     description:
-      "Solo te alertamos de ofertas con más del 90% de similitud semántica. Sin spam, solo oportunidades reales que encajan con tu perfil.",
+      "Copia y pega la descripción del puesto. La IA extrae skills requeridos, experiencia y competencias clave.",
     color: "info",
   },
   {
-    icon: Send,
+    icon: BarChart3,
     number: "03",
-    title: "Postulación Asistida y Estratégica",
+    title: "Recibe el Top 5 Rankeado",
     description:
-      "Prepara tu paquete de postulación: CV personalizado, cover letter y respuestas sugeridas. Tú tienes el control total.",
+      "En 2 minutos: score de compatibilidad, análisis STAR de cada candidato, heatmap de skills match.",
     color: "accent",
   },
   {
-    icon: BarChart3,
+    icon: Mail,
     number: "04",
-    title: "Análisis de Resultados y Aprendizaje",
+    title: "Contacta y Contrata",
     description:
-      "Mide KPIs como la Tasa de Entrevistas por Postulación para convertir tu búsqueda en una campaña de datos.",
+      "Exporta PDF para el equipo, envía emails automáticos a candidatos, agenda entrevistas directamente.",
     color: "success",
   },
 ];
@@ -45,11 +45,11 @@ export function HowItWorksSection() {
             Cómo funciona
           </span>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Tu camino hacia el empleo ideal
+            De caos a candidatos en 4 pasos
           </h2>
           <p className="text-muted-foreground">
-            Cuatro pasos estratégicos para transformar tu búsqueda de empleo de
-            esfuerzo sin conversión a estrategia con resultados.
+            Transforma horas de filtrado manual en minutos de análisis inteligente.
+            ROI inmediato desde el primer uso.
           </p>
         </div>
 

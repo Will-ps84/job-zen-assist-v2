@@ -20,17 +20,17 @@ export function CTASection() {
             </div>
 
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              Tu próximo trabajo está a un paso
+              ¿Listo para filtrar CVs 95% más rápido?
             </h2>
             <p className="text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
-              Únete a miles de profesionales que ya transformaron su búsqueda de
-              empleo con El Mentor Digital.
+              Únete a +500 PYMEs en LATAM que ya transformaron su proceso de reclutamiento.
+              Prueba gratis 7 días, sin tarjeta de crédito.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="xl" variant="accent" asChild>
                 <Link to="/registro">
-                  Comenzar gratis
+                  Comenzar prueba gratis
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
@@ -38,6 +38,11 @@ export function CTASection() {
                 <Link to="/precios">Ver planes</Link>
               </Button>
             </div>
+
+            {/* Social proof */}
+            <p className="text-sm text-primary-foreground/60 mt-8">
+              ⭐ 4.8/5 de satisfacción | 50,000+ CVs procesados | 5 países LATAM
+            </p>
           </div>
         </div>
       </div>
