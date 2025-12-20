@@ -68,6 +68,7 @@ export default function ScreenerFlow() {
     poolQualityComment: string;
   } | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateResult | null>(null);
+  const [expandedCandidate, setExpandedCandidate] = useState<number | null>(null);
 
   const handleFilesExtracted = (files: ExtractedFile[]) => {
     setExtractedFiles(files);
@@ -297,35 +298,35 @@ export default function ScreenerFlow() {
                     Categoría del Rol
                   </h3>
                 </div>
-                  <Select value={roleCategory} onValueChange={setRoleCategory} disabled={isAnalyzing}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona una categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLE_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Ayuda a mejorar la detección de skills relevantes.
-                  </p>
-                </CardContent>
-              </Card>
+                <Select value={roleCategory} onValueChange={setRoleCategory} disabled={isAnalyzing}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Ayuda a mejorar la detección de skills relevantes.
+                </p>
+              </CardContent>
+            </Card>
 
-              {/* Job Description */}
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground">
-                      Job Description
-                    </h3>
-                  </div>
-                  <Textarea
-                    placeholder="Pega aquí la descripción completa del puesto...
+            {/* Job Description */}
+            <Card className="border-border">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h3 className="font-semibold text-foreground">
+                    Job Description
+                  </h3>
+                </div>
+                <Textarea
+                  placeholder="Pega aquí la descripción completa del puesto...
 
 Incluye:
 • Título del puesto
@@ -333,235 +334,238 @@ Incluye:
 • Responsabilidades principales
 • Skills deseables
 • Cualquier otro requisito importante"
-                    value={jobDescription}
-                    onChange={(e) => setJobDescription(e.target.value)}
-                    rows={12}
-                    className="resize-none"
-                    disabled={isAnalyzing}
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {jobDescription.length}/50 caracteres mínimos
-                  </p>
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  rows={12}
+                  className="resize-none"
+                  disabled={isAnalyzing}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  {jobDescription.length}/50 caracteres mínimos
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Analyze Button */}
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg"
+              onClick={analyzeCandidates}
+              disabled={
+                isAnalyzing ||
+                extractedFiles.length === 0 ||
+                jobDescription.length < 50
+              }
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Analizar y Rankear CVs
+                </>
+              )}
+            </Button>
+
+            {isAnalyzing && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{progressMessage}</span>
+                      <span className="font-medium text-primary">{analysisProgress}%</span>
+                    </div>
+                    <Progress value={analysisProgress} className="h-2" />
+                    <p className="text-xs text-center text-muted-foreground">
+                      Esto puede tardar hasta 2 minutos para 100 CVs
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
+            )}
+          </div>
 
-              {/* Analyze Button */}
-              <Button
-                size="lg"
-                className="w-full h-14 text-lg"
-                onClick={analyzeCandidates}
-                disabled={
-                  isAnalyzing ||
-                  extractedFiles.length === 0 ||
-                  jobDescription.length < 50
-                }
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Analizando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Analizar y Rankear CVs
-                  </>
-                )}
-              </Button>
+          {/* Right Column: Results */}
+          <Card className={`border-border transition-all ${results ? "ring-2 ring-primary/30" : ""}`}>
+            <CardContent className="pt-6">
+              {!results && !isAnalyzing && (
+                <div className="text-center py-20">
+                  <TrendingUp className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-foreground font-medium text-lg">
+                    Tu Top 5 candidatos aparecerá aquí
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+                    Con score de compatibilidad, match de skills y logros tipo STAR
+                  </p>
+                </div>
+              )}
 
               {isAnalyzing && (
-                <Card className="border-primary/30 bg-primary/5">
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{progressMessage}</span>
-                        <span className="font-medium text-primary">{analysisProgress}%</span>
-                      </div>
-                      <Progress value={analysisProgress} className="h-2" />
-                      <p className="text-xs text-center text-muted-foreground">
-                        Esto puede tardar hasta 2 minutos para 100 CVs
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-20">
+                  <Loader2 className="w-16 h-16 text-primary mx-auto mb-4 animate-spin" />
+                  <p className="text-foreground font-medium text-lg">
+                    Analizando {extractedFiles.length} CVs...
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {progressMessage}
+                  </p>
+                </div>
               )}
-            </div>
 
-            {/* Right Column: Results */}
-            <Card className={`border-border transition-all ${results ? "ring-2 ring-primary/30" : ""}`}>
-              <CardContent className="pt-6">
-                {!results && !isAnalyzing && (
-                  <div className="text-center py-20">
-                    <TrendingUp className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-                    <p className="text-foreground font-medium text-lg">
-                      Tu Top 5 candidatos aparecerá aquí
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-                      Con score de compatibilidad, match de skills y logros tipo STAR
-                    </p>
-                  </div>
-                )}
-
-                {isAnalyzing && (
-                  <div className="text-center py-20">
-                    <Loader2 className="w-16 h-16 text-primary mx-auto mb-4 animate-spin" />
-                    <p className="text-foreground font-medium text-lg">
-                      Analizando {extractedFiles.length} CVs...
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {progressMessage}
-                    </p>
-                  </div>
-                )}
-
-                {results && (
-                  <div className="space-y-4">
-                    {/* Summary Header */}
-                    <div className="bg-muted/50 rounded-lg p-4 mb-6">
-                      <p className="text-foreground">
-                        <strong>Analizados {results.totalAnalyzed} CVs</strong> — estos son tus{" "}
-                        <strong className="text-primary">{results.topCandidates.length} mejores candidatos</strong>
-                      </p>
+              {results && (
+                <div className="space-y-4">
+                  {/* Summary Header */}
+                  <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground">
+                          Analizados {results.totalAnalyzed} CVs
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Estos son tus 5 mejores candidatos para{" "}
+                          <span className="font-medium text-foreground">
+                            {extractJobTitle(jobDescription)}
+                          </span>
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-foreground flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-primary" />
-                        Top {results.topCandidates.length} Candidatos
-                      </h3>
-                      <Button variant="outline" size="sm" onClick={handleExportPDF}>
-                        <Download className="w-4 h-4 mr-1" />
-                        Descargar PDF
-                      </Button>
+                  {/* Pool Quality Comment */}
+                  {results.poolQualityComment && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-800 mb-1">
+                          Análisis del pool de candidatos
+                        </p>
+                        <p className="text-sm text-amber-700">
+                          {results.poolQualityComment}
+                        </p>
+                      </div>
                     </div>
+                  )}
 
-                    {/* Candidates List */}
+                  {/* Candidates List */}
+                  <div className="space-y-3">
                     {results.topCandidates.map((candidate, index) => (
                       <div
                         key={index}
-                        className={`p-4 rounded-lg border ${getScoreBg(candidate.score)} transition-all hover:shadow-md cursor-pointer`}
-                        onClick={() => setSelectedCandidate(
-                          selectedCandidate?.name === candidate.name ? null : candidate
-                        )}
+                        className={`border rounded-lg p-4 transition-all cursor-pointer hover:shadow-md ${getScoreBg(
+                          candidate.score
+                        )} ${
+                          expandedCandidate === index
+                            ? "ring-2 ring-primary"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setExpandedCandidate(
+                            expandedCandidate === index ? null : index
+                          )
+                        }
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                                {index + 1}
+                              <span className="font-semibold text-foreground">
+                                #{index + 1}
                               </span>
-                              <h4 className="font-semibold text-foreground truncate">
+                              <span className="font-medium text-foreground truncate">
                                 {candidate.name}
-                              </h4>
-                            </div>
-                            <p className="text-xs text-muted-foreground mb-2 ml-9">
-                              {candidate.experience}
-                            </p>
-
-                            {/* STAR Bullets */}
-                            <div className="ml-9 space-y-1 mb-2">
-                              {candidate.starBullets.slice(0, 2).map((bullet, i) => (
-                                <p key={i} className="text-sm text-muted-foreground flex items-start gap-1">
-                                  <Star className="w-3 h-3 mt-1 shrink-0 text-primary" />
-                                  <span>{bullet}</span>
-                                </p>
-                              ))}
-                            </div>
-
-                            {/* Skills Tags */}
-                            <div className="ml-9 flex flex-wrap gap-1">
-                              {candidate.strengths.slice(0, 4).map((skill) => (
-                                <Badge key={skill} variant="secondary" className="text-xs">
-                                  <CheckCircle2 className="w-2.5 h-2.5 mr-1" />
-                                  {skill}
+                              </span>
+                              {index === 0 && (
+                                <Badge
+                                  variant="default"
+                                  className="bg-green-600"
+                                >
+                                  <Star className="w-3 h-3 mr-1" />
+                                  Top Pick
                                 </Badge>
-                              ))}
-                              {candidate.gaps.slice(0, 2).map((gap) => (
-                                <Badge key={gap} variant="outline" className="text-xs text-muted-foreground">
-                                  <AlertTriangle className="w-2.5 h-2.5 mr-1" />
-                                  {gap}
-                                </Badge>
-                              ))}
+                              )}
                             </div>
+                            <div className="flex flex-wrap gap-2 text-sm">
+                              <span
+                                className={`font-semibold ${getScoreColor(
+                                  candidate.score
+                                )}`}
+                              >
+                                Score: {candidate.score}%
+                              </span>
+                              <span className="text-muted-foreground">•</span>
+                              <span className="text-muted-foreground">
+                                Skills: {candidate.skillsMatch}%
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronRight
+                            className={`w-5 h-5 text-muted-foreground transition-transform ${
+                              expandedCandidate === index ? "rotate-90" : ""
+                            }`}
+                          />
+                        </div>
 
-                            {/* Expanded Details */}
-                            {selectedCandidate?.name === candidate.name && (
-                              <div className="ml-9 mt-4 pt-4 border-t space-y-2">
+                        {expandedCandidate === index && (
+                          <div className="mt-4 pt-4 border-t border-border">
+                            {/* Contact Info */}
+                            {(candidate.email || candidate.phone) && (
+                              <div className="flex flex-wrap gap-4 mb-4 text-sm">
                                 {candidate.email && (
-                                  <p className="text-sm flex items-center gap-2">
-                                    <Mail className="w-4 h-4 text-muted-foreground" />
-                                    <a href={`mailto:${candidate.email}`} className="text-primary hover:underline">
-                                      {candidate.email}
-                                    </a>
-                                  </p>
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Mail className="w-4 h-4" />
+                                    <span>{candidate.email}</span>
+                                  </div>
                                 )}
                                 {candidate.phone && (
-                                  <p className="text-sm flex items-center gap-2">
-                                    <Phone className="w-4 h-4 text-muted-foreground" />
-                                    <a href={`tel:${candidate.phone}`} className="text-primary hover:underline">
-                                      {candidate.phone}
-                                    </a>
-                                  </p>
-                                )}
-                                {candidate.starBullets.length > 2 && (
-                                  <div className="mt-2">
-                                    <p className="text-xs font-medium text-muted-foreground mb-1">Más logros:</p>
-                                    {candidate.starBullets.slice(2).map((bullet, i) => (
-                                      <p key={i} className="text-sm text-muted-foreground flex items-start gap-1">
-                                        <Star className="w-3 h-3 mt-1 shrink-0 text-primary" />
-                                        <span>{bullet}</span>
-                                      </p>
-                                    ))}
+                                  <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Phone className="w-4 h-4" />
+                                    <span>{candidate.phone}</span>
                                   </div>
                                 )}
                               </div>
                             )}
-                          </div>
 
-                          {/* Score */}
-                          <div className="text-right shrink-0">
-                            <div className={`text-2xl font-bold ${getScoreColor(candidate.score)}`}>
-                              {candidate.score}%
+                            {/* STAR Bullets */}
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-foreground flex items-center gap-1">
+                                <FileStack className="w-4 h-4" />
+                                Logros destacados (STAR)
+                              </p>
+                              <ul className="space-y-1.5">
+                                {candidate.starBullets.map((bullet, bulletIdx) => (
+                                  <li
+                                    key={bulletIdx}
+                                    className="text-sm text-muted-foreground flex items-start gap-2"
+                                  >
+                                    <ArrowRight className="w-3 h-3 mt-1.5 shrink-0 text-primary" />
+                                    <span>{bullet}</span>
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
-                            <div className="text-xs text-muted-foreground">Match</div>
-                            <div className="mt-2">
-                              <Progress value={candidate.skillsMatch} className="w-16 h-1.5" />
-                              <span className="text-xs text-muted-foreground">{candidate.skillsMatch}% skills</span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 mt-2 text-muted-foreground transition-transform ${
-                              selectedCandidate?.name === candidate.name ? 'rotate-90' : ''
-                            }`} />
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
-
-                    {/* Pool Quality Comment */}
-                    <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border">
-                      <p className="text-sm font-medium text-foreground mb-1 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        Comentario sobre el pool
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {results.poolQualityComment}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-6 flex gap-3">
-                      <Button className="flex-1" variant="default" onClick={handleExportPDF}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Descargar Informe PDF
-                      </Button>
-                      <Button variant="outline" onClick={handleNewAnalysis}>
-                        Nuevo Análisis
-                      </Button>
-                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+
+                  {/* Actions */}
+                  <div className="mt-6 flex gap-3">
+                    <Button className="flex-1" variant="default" onClick={handleExportPDF}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Descargar Informe PDF
+                    </Button>
+                    <Button variant="outline" onClick={handleNewAnalysis}>
+                      Nuevo Análisis
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>
