@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/app/AppLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -12,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Target,
   Loader2,
@@ -26,7 +36,13 @@ import {
   Mail,
   Phone,
   History,
-  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Briefcase,
+  Settings2,
+  DollarSign,
+  Clock,
+  Tag,
 } from "lucide-react";
 import { CVUploadZone } from "@/components/screener/CVUploadZone";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +57,13 @@ interface ExtractedFile {
   name: string;
   content: string;
   size: number;
+}
+
+interface AnalysisCriteria {
+  jobTitle: string;
+  minExperience: number;
+  keySkills: string;
+  salaryRange: string;
 }
 
 const ROLE_CATEGORIES = [
@@ -67,8 +90,15 @@ export default function ScreenerFlow() {
     totalAnalyzed: number;
     poolQualityComment: string;
   } | null>(null);
-  const [selectedCandidate, setSelectedCandidate] = useState<CandidateResult | null>(null);
   const [expandedCandidate, setExpandedCandidate] = useState<number | null>(null);
+
+  // New criteria state
+  const [criteria, setCriteria] = useState<AnalysisCriteria>({
+    jobTitle: "",
+    minExperience: 0,
+    keySkills: "",
+    salaryRange: "",
+  });
 
   const handleFilesExtracted = (files: ExtractedFile[]) => {
     setExtractedFiles(files);
@@ -76,6 +106,11 @@ export default function ScreenerFlow() {
   };
 
   const extractJobTitle = (description: string): string => {
+    // If user provided a title, use it
+    if (criteria.jobTitle.trim()) {
+      return criteria.jobTitle.trim();
+    }
+    
     // Try to extract job title from first line or common patterns
     const lines = description.trim().split('\n');
     const firstLine = lines[0]?.trim() || '';
@@ -166,6 +201,12 @@ export default function ScreenerFlow() {
           jobTitle,
           roleCategory,
           maxResults: 5,
+          // Pass criteria for future use
+          criteria: {
+            minExperience: criteria.minExperience,
+            keySkills: criteria.keySkills,
+            salaryRange: criteria.salaryRange,
+          },
         },
       });
 
@@ -245,7 +286,8 @@ export default function ScreenerFlow() {
       jobDescription,
       results.totalAnalyzed,
       results.topCandidates,
-      results.poolQualityComment
+      results.poolQualityComment,
+      criteria
     );
     toast.success("Abriendo ventana de impresión...");
   };
@@ -255,6 +297,12 @@ export default function ScreenerFlow() {
     setExtractedFiles([]);
     setJobDescription("");
     setRoleCategory("general");
+    setCriteria({
+      jobTitle: "",
+      minExperience: 0,
+      keySkills: "",
+      salaryRange: "",
+    });
   };
 
   return (
@@ -267,7 +315,7 @@ export default function ScreenerFlow() {
               Análisis de CVs con IA
             </h1>
             <p className="text-muted-foreground">
-              Sube hasta 100 CVs, pega la descripción del puesto y obtén el Top 5 candidatos.
+              Sube hasta 200 CVs, configura tus criterios y obtén el Top 5 candidatos listos para entrevista.
             </p>
           </div>
           <Button variant="outline" size="sm" asChild className="shrink-0">
@@ -281,40 +329,110 @@ export default function ScreenerFlow() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left Column: Inputs */}
           <div className="space-y-6">
+            {/* Job Configuration Card */}
+            <Card className="border-border">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Settings2 className="w-5 h-5 text-primary" />
+                  Configuración del puesto
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Job Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="jobTitle" className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    Título de la vacante
+                  </Label>
+                  <Input
+                    id="jobTitle"
+                    placeholder="Ej: Desarrollador Full Stack Senior"
+                    value={criteria.jobTitle}
+                    onChange={(e) => setCriteria({ ...criteria, jobTitle: e.target.value })}
+                    disabled={isAnalyzing}
+                  />
+                </div>
+
+                {/* Min Experience and Salary Range */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="minExperience" className="flex items-center gap-2">
+                      <Clock className="w-4 h-4" />
+                      Experiencia mínima (años)
+                    </Label>
+                    <Input
+                      id="minExperience"
+                      type="number"
+                      min={0}
+                      max={30}
+                      placeholder="0"
+                      value={criteria.minExperience || ""}
+                      onChange={(e) => setCriteria({ ...criteria, minExperience: parseInt(e.target.value) || 0 })}
+                      disabled={isAnalyzing}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="salaryRange" className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      Rango salarial (opcional)
+                    </Label>
+                    <Input
+                      id="salaryRange"
+                      placeholder="Ej: $2,000-$3,500 USD"
+                      value={criteria.salaryRange}
+                      onChange={(e) => setCriteria({ ...criteria, salaryRange: e.target.value })}
+                      disabled={isAnalyzing}
+                    />
+                  </div>
+                </div>
+
+                {/* Key Skills */}
+                <div className="space-y-2">
+                  <Label htmlFor="keySkills" className="flex items-center gap-2">
+                    <Tag className="w-4 h-4" />
+                    Tecnologías o habilidades clave
+                  </Label>
+                  <Input
+                    id="keySkills"
+                    placeholder="Ej: React, Node.js, PostgreSQL, AWS"
+                    value={criteria.keySkills}
+                    onChange={(e) => setCriteria({ ...criteria, keySkills: e.target.value })}
+                    disabled={isAnalyzing}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Separa con comas las habilidades más importantes.
+                  </p>
+                </div>
+
+                {/* Role Category */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Categoría del rol
+                  </Label>
+                  <Select value={roleCategory} onValueChange={setRoleCategory} disabled={isAnalyzing}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* CV Upload */}
             <CVUploadZone
               onFilesExtracted={handleFilesExtracted}
               isProcessing={isAnalyzing}
-              maxFiles={100}
+              maxFiles={200}
               maxSizeMB={50}
             />
-
-            {/* Role Category */}
-            <Card className="border-border">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-foreground">
-                    Categoría del Rol
-                  </h3>
-                </div>
-                <Select value={roleCategory} onValueChange={setRoleCategory} disabled={isAnalyzing}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ROLE_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Ayuda a mejorar la detección de skills relevantes.
-                </p>
-              </CardContent>
-            </Card>
 
             {/* Job Description */}
             <Card className="border-border">
@@ -329,14 +447,13 @@ export default function ScreenerFlow() {
                   placeholder="Pega aquí la descripción completa del puesto...
 
 Incluye:
-• Título del puesto
 • Requisitos técnicos y experiencia
 • Responsabilidades principales
 • Skills deseables
 • Cualquier otro requisito importante"
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  rows={12}
+                  rows={10}
                   className="resize-none"
                   disabled={isAnalyzing}
                 />
@@ -365,7 +482,7 @@ Incluye:
               ) : (
                 <>
                   <Sparkles className="w-5 h-5 mr-2" />
-                  Analizar y Rankear CVs
+                  Analizar CVs
                 </>
               )}
             </Button>
@@ -380,7 +497,7 @@ Incluye:
                     </div>
                     <Progress value={analysisProgress} className="h-2" />
                     <p className="text-xs text-center text-muted-foreground">
-                      Esto puede tardar hasta 2 minutos para 100 CVs
+                      Esto puede tardar hasta 2 minutos para 200 CVs
                     </p>
                   </div>
                 </CardContent>
@@ -423,13 +540,13 @@ Incluye:
                       <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0 mt-0.5" />
                       <div>
                         <p className="font-medium text-foreground">
-                          Analizados {results.totalAnalyzed} CVs
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Estos son tus 5 mejores candidatos para{" "}
-                          <span className="font-medium text-foreground">
-                            {extractJobTitle(jobDescription)}
+                          Analizamos {results.totalAnalyzed} CVs para la vacante{" "}
+                          <span className="text-primary">
+                            "{extractJobTitle(jobDescription)}"
                           </span>
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Estos son tus {results.topCandidates.length} mejores candidatos.
                         </p>
                       </div>
                     </div>
@@ -450,113 +567,135 @@ Incluye:
                     </div>
                   )}
 
-                  {/* Candidates List */}
-                  <div className="space-y-3">
-                    {results.topCandidates.map((candidate, index) => (
-                      <div
-                        key={index}
-                        className={`border rounded-lg p-4 transition-all cursor-pointer hover:shadow-md ${getScoreBg(
-                          candidate.score
-                        )} ${
-                          expandedCandidate === index
-                            ? "ring-2 ring-primary"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          setExpandedCandidate(
-                            expandedCandidate === index ? null : index
-                          )
-                        }
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-foreground">
-                                #{index + 1}
-                              </span>
-                              <span className="font-medium text-foreground truncate">
-                                {candidate.name}
-                              </span>
-                              {index === 0 && (
-                                <Badge
-                                  variant="default"
-                                  className="bg-green-600"
+                  {/* Results Table */}
+                  <div className="rounded-lg border border-border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="w-[50px]">#</TableHead>
+                          <TableHead>Candidato</TableHead>
+                          <TableHead className="text-center w-[80px]">Score</TableHead>
+                          <TableHead className="text-center w-[80px]">Skills</TableHead>
+                          <TableHead className="hidden md:table-cell">Logros STAR</TableHead>
+                          <TableHead className="w-[80px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {results.topCandidates.map((candidate, index) => (
+                          <>
+                            <TableRow 
+                              key={`row-${index}`}
+                              className={`cursor-pointer hover:bg-muted/50 ${expandedCandidate === index ? "bg-muted/30" : ""}`}
+                              onClick={() => setExpandedCandidate(expandedCandidate === index ? null : index)}
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-1">
+                                  {index + 1}
+                                  {index === 0 && (
+                                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-foreground">{candidate.name}</p>
+                                  {candidate.email && (
+                                    <p className="text-xs text-muted-foreground">{candidate.email}</p>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge 
+                                  variant="secondary" 
+                                  className={`${
+                                    candidate.score >= 85 
+                                      ? "bg-green-100 text-green-700 border-green-200" 
+                                      : candidate.score >= 70 
+                                      ? "bg-yellow-100 text-yellow-700 border-yellow-200" 
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
                                 >
-                                  <Star className="w-3 h-3 mr-1" />
-                                  Top Pick
+                                  {candidate.score}%
                                 </Badge>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap gap-2 text-sm">
-                              <span
-                                className={`font-semibold ${getScoreColor(
-                                  candidate.score
-                                )}`}
-                              >
-                                Score: {candidate.score}%
-                              </span>
-                              <span className="text-muted-foreground">•</span>
-                              <span className="text-muted-foreground">
-                                Skills: {candidate.skillsMatch}%
-                              </span>
-                            </div>
-                          </div>
-                          <ChevronRight
-                            className={`w-5 h-5 text-muted-foreground transition-transform ${
-                              expandedCandidate === index ? "rotate-90" : ""
-                            }`}
-                          />
-                        </div>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <span className="text-sm text-muted-foreground">{candidate.skillsMatch}%</span>
+                              </TableCell>
+                              <TableCell className="hidden md:table-cell">
+                                <ul className="space-y-1">
+                                  {candidate.starBullets.slice(0, 2).map((bullet, bulletIdx) => (
+                                    <li key={bulletIdx} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                      <ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-primary" />
+                                      <span className="line-clamp-1">{bullet}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </TableCell>
+                              <TableCell>
+                                <Button variant="ghost" size="sm">
+                                  {expandedCandidate === index ? (
+                                    <ChevronUp className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                            {expandedCandidate === index && (
+                              <TableRow key={`expanded-${index}`}>
+                                <TableCell colSpan={6} className="bg-muted/20 p-4">
+                                  <div className="space-y-4">
+                                    {/* Contact Info */}
+                                    {(candidate.email || candidate.phone) && (
+                                      <div className="flex flex-wrap gap-4 text-sm">
+                                        {candidate.email && (
+                                          <div className="flex items-center gap-1 text-muted-foreground">
+                                            <Mail className="w-4 h-4" />
+                                            <span>{candidate.email}</span>
+                                          </div>
+                                        )}
+                                        {candidate.phone && (
+                                          <div className="flex items-center gap-1 text-muted-foreground">
+                                            <Phone className="w-4 h-4" />
+                                            <span>{candidate.phone}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
 
-                        {expandedCandidate === index && (
-                          <div className="mt-4 pt-4 border-t border-border">
-                            {/* Contact Info */}
-                            {(candidate.email || candidate.phone) && (
-                              <div className="flex flex-wrap gap-4 mb-4 text-sm">
-                                {candidate.email && (
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <Mail className="w-4 h-4" />
-                                    <span>{candidate.email}</span>
+                                    {/* All STAR Bullets */}
+                                    <div>
+                                      <p className="text-sm font-medium text-foreground flex items-center gap-1 mb-2">
+                                        <FileStack className="w-4 h-4" />
+                                        Todos los logros STAR
+                                      </p>
+                                      <ul className="space-y-1.5">
+                                        {candidate.starBullets.map((bullet, bulletIdx) => (
+                                          <li
+                                            key={bulletIdx}
+                                            className="text-sm text-muted-foreground flex items-start gap-2"
+                                          >
+                                            <ArrowRight className="w-3 h-3 mt-1.5 shrink-0 text-primary" />
+                                            <span>{bullet}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
                                   </div>
-                                )}
-                                {candidate.phone && (
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <Phone className="w-4 h-4" />
-                                    <span>{candidate.phone}</span>
-                                  </div>
-                                )}
-                              </div>
+                                </TableCell>
+                              </TableRow>
                             )}
-
-                            {/* STAR Bullets */}
-                            <div className="space-y-2">
-                              <p className="text-sm font-medium text-foreground flex items-center gap-1">
-                                <FileStack className="w-4 h-4" />
-                                Logros destacados (STAR)
-                              </p>
-                              <ul className="space-y-1.5">
-                                {candidate.starBullets.map((bullet, bulletIdx) => (
-                                  <li
-                                    key={bulletIdx}
-                                    className="text-sm text-muted-foreground flex items-start gap-2"
-                                  >
-                                    <ArrowRight className="w-3 h-3 mt-1.5 shrink-0 text-primary" />
-                                    <span>{bullet}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                          </>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
 
                   {/* Actions */}
                   <div className="mt-6 flex gap-3">
                     <Button className="flex-1" variant="default" onClick={handleExportPDF}>
                       <Download className="w-4 h-4 mr-2" />
-                      Descargar Informe PDF
+                      Descargar reporte PDF
                     </Button>
                     <Button variant="outline" onClick={handleNewAnalysis}>
                       Nuevo Análisis

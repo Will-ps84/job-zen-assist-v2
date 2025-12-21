@@ -30,7 +30,7 @@ export function CTASection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="xl" variant="accent" asChild>
                 <Link to="/registro">
-                  Comenzar prueba gratis
+                  Probar análisis de CVs
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
