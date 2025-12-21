@@ -24,13 +24,13 @@ export function CTASection() {
             </h2>
             <p className="text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
               Únete a +500 PYMEs en LATAM que ya transformaron su proceso de reclutamiento.
-              Prueba gratis 7 días, sin tarjeta de crédito.
+              Crea tu cuenta gratis y comienza a filtrar CVs en minutos.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="xl" variant="accent" asChild>
                 <Link to="/registro">
-                  Probar análisis de CVs
+                  Crear cuenta gratis
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
