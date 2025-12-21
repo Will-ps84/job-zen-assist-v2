@@ -2,23 +2,26 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import JSZip from "jszip";
 import * as pdfjsLib from "pdfjs-dist";
+// Local worker bundled by Vite (no CDN). Comes from the same pdfjs-dist version.
+// eslint-disable-next-line import/no-unresolved
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Upload, 
-  FileArchive, 
-  FileText, 
-  CheckCircle2, 
+import {
+  Upload,
+  FileArchive,
+  FileText,
+  CheckCircle2,
   AlertTriangle,
   X,
-  Loader2 
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Configure PDF.js worker - use local file from public folder
-pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+// Configure PDF.js worker (must be set before calling getDocument)
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 interface ExtractedFile {
   name: string;
