@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -9,6 +9,9 @@ const ALLOWED_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/msword',
 ];
+
+// Short-lived signed URL expiration (1 hour)
+const SIGNED_URL_EXPIRATION = 3600;
 
 export function useResumeStorage() {
   const { user } = useAuth();
@@ -36,7 +39,7 @@ export function useResumeStorage() {
       const filePath = `${user.id}/${resumeId}/${Date.now()}.${fileExt}`;
 
       // Upload to storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('resumes')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -45,18 +48,12 @@ export function useResumeStorage() {
 
       if (uploadError) throw uploadError;
 
-      // Get signed URL (valid for 1 year)
-      const { data: urlData } = await supabase.storage
-        .from('resumes')
-        .createSignedUrl(filePath, 31536000);
-
-      const fileUrl = urlData?.signedUrl || '';
-
-      // Update resume record with file metadata
+      // Store only the file path in database, NOT a signed URL
+      // Signed URLs will be generated on-demand when downloading
       const { error: updateError } = await supabase
         .from('resumes')
         .update({
-          file_url: fileUrl,
+          file_url: filePath, // Store path only, not signed URL
           file_name: file.name,
           file_type: file.type,
           file_size: file.size,
@@ -71,7 +68,6 @@ export function useResumeStorage() {
       return { 
         data: { 
           path: filePath, 
-          url: fileUrl,
           name: file.name,
           size: file.size,
           type: file.type,
@@ -119,9 +115,38 @@ export function useResumeStorage() {
     }
   };
 
-  const downloadResume = async (fileUrl: string, fileName: string) => {
+  // Generate a short-lived signed URL on-demand for download
+  const getDownloadUrl = async (filePath: string): Promise<string | null> => {
+    if (!user) return null;
+
     try {
-      const response = await fetch(fileUrl);
+      const { data, error } = await supabase.storage
+        .from('resumes')
+        .createSignedUrl(filePath, SIGNED_URL_EXPIRATION);
+
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return null;
+      }
+
+      return data?.signedUrl || null;
+    } catch (error) {
+      console.error('Error getting download URL:', error);
+      return null;
+    }
+  };
+
+  const downloadResume = async (filePath: string, fileName: string) => {
+    try {
+      // Generate short-lived signed URL on-demand
+      const signedUrl = await getDownloadUrl(filePath);
+      
+      if (!signedUrl) {
+        toast.error('Error al generar enlace de descarga');
+        return { error: new Error('Failed to get download URL') };
+      }
+
+      const response = await fetch(signedUrl);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       
@@ -153,6 +178,7 @@ export function useResumeStorage() {
     uploadResume,
     deleteResumeFile,
     downloadResume,
+    getDownloadUrl,
     formatFileSize,
     uploading,
   };
