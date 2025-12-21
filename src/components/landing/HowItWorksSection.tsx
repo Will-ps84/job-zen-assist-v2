@@ -1,10 +1,10 @@
-import { Upload, FileText, BarChart3, Mail, ArrowRight } from "lucide-react";
+import { Upload, FileText, SlidersHorizontal, Trophy, ArrowRight } from "lucide-react";
 
 const steps = [
   {
     icon: Upload,
     number: "01",
-    title: "Sube el ZIP de CVs",
+    title: "Sube ZIP de CVs",
     description:
       "Arrastra el archivo ZIP descargado de Bumeran, Computrabajo o Indeed. Soportamos hasta 200 CVs por análisis.",
     color: "primary",
@@ -12,25 +12,25 @@ const steps = [
   {
     icon: FileText,
     number: "02",
-    title: "Pega el Job Description",
+    title: "Pega la descripción del puesto",
     description:
-      "Copia y pega la descripción del puesto. La IA extrae skills requeridos, experiencia y competencias clave.",
+      "Copia y pega el job description completo. La IA extrae skills requeridos, experiencia y competencias clave.",
     color: "info",
   },
   {
-    icon: BarChart3,
+    icon: SlidersHorizontal,
     number: "03",
-    title: "Recibe el Top 5 Rankeado",
+    title: "Ajusta criterios de filtrado",
     description:
-      "En 2 minutos: score de compatibilidad, análisis STAR de cada candidato, heatmap de skills match.",
+      "Define años de experiencia mínima, skills clave y rango salarial para afinar el ranking de candidatos.",
     color: "accent",
   },
   {
-    icon: Mail,
+    icon: Trophy,
     number: "04",
-    title: "Contacta y Contrata",
+    title: "Recibe Top 5 con resumen STAR",
     description:
-      "Exporta PDF para el equipo, envía emails automáticos a candidatos, agenda entrevistas directamente.",
+      "En 2 minutos: score de compatibilidad, match de skills y logros destacados en formato STAR para cada candidato.",
     color: "success",
   },
 ];

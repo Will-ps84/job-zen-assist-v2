@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Clock, Users, Zap, FileStack } from "lucide-react";
 
 const benefits = [
-  "Filtra 200+ CVs en minutos",
-  "Análisis STAR automático",
-  "Ranking IA con explicación",
+  "Sube ZIP de CVs de Bumeran/Computrabajo",
+  "Pega la descripción del puesto",
+  "Recibe Top 5 con análisis STAR",
 ];
 
 export function HeroSection() {
@@ -25,24 +25,23 @@ export function HeroSection() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 mb-8 animate-fade-in">
             <Zap className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-primary-foreground">
-              Reclutamiento inteligente para PYMEs LATAM
+              Reclutamiento IA para PYMEs LATAM
             </span>
           </div>
 
           {/* Headline */}
           <h1 className="font-display font-bold text-primary-foreground leading-[1.1] mb-6 animate-slide-up text-[clamp(2rem,5vw,3.75rem)]">
-            <span className="block">De 200 CVs desordenados</span>
+            <span className="block">Filtra 200 CVs en 2 minutos:</span>
             <span className="block mt-2">
-              a{" "}
               <span className="text-underline-accent">Top 5 candidatos</span>
-              {" "}en 2 min
+              {" "}listos para entrevista
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-8 animate-slide-up delay-100">
-            Sube el ZIP de CVs de Bumeran/Computrabajo + pega el job description. 
-            Nuestra IA rankea candidatos con análisis STAR y score de compatibilidad.
+            Sube un ZIP con CVs de Bumeran/Computrabajo, pega la oferta, 
+            y la IA te entrega los mejores candidatos explicados con método STAR.
           </p>
 
           {/* Benefits */}
@@ -62,7 +61,7 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-300">
             <Button size="xl" variant="accent" asChild>
               <Link to="/registro">
-                Prueba Gratis 7 días
+                Probar análisis de CVs
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
@@ -80,7 +79,7 @@ export function HeroSection() {
 
           {/* Trust badges */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 animate-fade-in delay-500">
-            <StatCard icon={Clock} value="95%" label="Tiempo ahorrado" />
+            <StatCard icon={Clock} value="2 min" label="Por análisis" />
             <StatCard icon={Users} value="500+" label="PYMEs LATAM" />
             <StatCard icon={FileStack} value="50K+" label="CVs procesados" />
             <StatCard icon={CheckCircle2} value="5" label="Países" />
