@@ -104,10 +104,10 @@ export function AppLayout({ children }: AppLayoutProps) {
               )}
               <div className="flex flex-col">
                 <span className="font-display font-bold text-lg leading-tight text-sidebar-foreground">
-                  {settings.brand_name.split(' ')[0] || 'El Mentor'}
+                  {settings.brand_name.split(' ')[0] || 'HR Screener'}
                 </span>
                 <span className="text-xs text-sidebar-foreground/60 -mt-1">
-                  {settings.brand_name.split(' ').slice(1).join(' ') || 'Digital'}
+                  {settings.brand_name.split(' ').slice(1).join(' ') || 'LATAM'}
                 </span>
               </div>
             </Link>

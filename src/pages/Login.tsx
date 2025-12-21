@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { FileStack, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
@@ -65,15 +65,15 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+              <FileStack className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg leading-tight text-primary-foreground">
-                El Mentor
+                HR Screener
               </span>
               <span className="text-xs text-primary-foreground/60 -mt-1">
-                Digital
+                LATAM
               </span>
             </div>
           </Link>
@@ -82,10 +82,10 @@ export default function Login() {
           <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
             <div className="mb-6">
               <h1 className="font-display text-2xl font-bold text-foreground mb-2">
-                Bienvenido de vuelta
+                Bienvenido de vuelta a HR Screener LATAM
               </h1>
               <p className="text-muted-foreground text-sm">
-                Ingresa tus credenciales para continuar tu búsqueda estratégica.
+                Ingresa tus credenciales para continuar filtrando CVs.
               </p>
             </div>
 
@@ -167,14 +167,14 @@ export default function Login() {
       <div className="hidden lg:flex flex-1 items-center justify-center p-8">
         <div className="max-w-lg text-center">
           <div className="w-24 h-24 mx-auto mb-8 rounded-2xl bg-primary-foreground/10 flex items-center justify-center">
-            <Briefcase className="w-12 h-12 text-primary-foreground" />
+            <FileStack className="w-12 h-12 text-primary-foreground" />
           </div>
           <h2 className="font-display text-3xl font-bold text-primary-foreground mb-4">
-            Tu copiloto de carrera
+            Reclutamiento inteligente para LATAM
           </h2>
           <p className="text-primary-foreground/70 leading-relaxed">
-            Transforma tu búsqueda de empleo de postulación manual a estrategia
-            inteligente con IA explicable y metodología STAR.
+            Filtra CVs en minutos con IA explicable y análisis STAR para tus
+            procesos de selección en México, Argentina, Colombia, Perú y Chile.
           </p>
         </div>
       </div>

@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Briefcase,
+  FileStack,
   ArrowRight,
   ArrowLeft,
   Upload,
@@ -75,13 +75,13 @@ export default function Onboarding() {
   // Dynamically determine steps based on whether country is already set
   const steps = hasCountry ? [
     { id: 1, title: "Objetivo", icon: Target },
-    { id: 2, title: "Experiencia", icon: Briefcase },
+    { id: 2, title: "Experiencia", icon: FileStack },
     { id: 3, title: "CV", icon: Upload },
     { id: 4, title: "Expectativas", icon: DollarSign },
   ] : [
     { id: 1, title: "Ubicación", icon: Globe },
     { id: 2, title: "Objetivo", icon: Target },
-    { id: 3, title: "Experiencia", icon: Briefcase },
+    { id: 3, title: "Experiencia", icon: FileStack },
     { id: 4, title: "CV", icon: Upload },
     { id: 5, title: "Expectativas", icon: DollarSign },
   ];
@@ -579,13 +579,13 @@ export default function Onboarding() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-primary-foreground" />
+              <FileStack className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg leading-tight">
-                El Mentor
+                HR Screener
               </span>
-              <span className="text-xs text-muted-foreground -mt-1">Digital</span>
+              <span className="text-xs text-muted-foreground -mt-1">LATAM</span>
             </div>
           </div>
           <Button variant="ghost" onClick={() => navigate("/app/dashboard")}>
