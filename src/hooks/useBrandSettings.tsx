@@ -11,8 +11,8 @@ export interface BrandSettings {
 
 const defaultSettings: BrandSettings = {
   id: '',
-  brand_name: 'Job Zen Assist',
-  slogan: 'Tu mentor digital para encontrar el trabajo ideal',
+  brand_name: 'HR Screener LATAM',
+  slogan: 'Filtra CVs en minutos con IA explicable',
   logo_url: null,
   primary_color: '#8B5CF6',
 };

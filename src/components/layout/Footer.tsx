@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Briefcase } from "lucide-react";
+import { FileStack } from "lucide-react";
 import { useCallback } from "react";
 
 const footerLinks = {
@@ -45,20 +45,20 @@ export function Footer() {
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-sidebar-primary-foreground" />
+                <FileStack className="w-5 h-5 text-sidebar-primary-foreground" />
               </div>
               <div className="flex flex-col">
                 <span className="font-display font-bold text-lg leading-tight text-primary-foreground">
-                  El Mentor
+                  HR Screener
                 </span>
                 <span className="text-xs -mt-1 text-primary-foreground">
-                  Digital
+                  LATAM
                 </span>
               </div>
             </Link>
             <p className="text-sm leading-relaxed text-primary-foreground">
-              De la postulación manual a la estrategia IA. Tu copiloto para
-              conseguir el trabajo que mereces.
+              Filtra CVs en minutos con IA explicable y análisis STAR para tus
+              procesos de selección en LATAM.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground">
-            © {new Date().getFullYear()} El Mentor Digital. Todos los derechos
+            © {new Date().getFullYear()} HR Screener LATAM. Todos los derechos
             reservados.
           </p>
           <div className="flex items-center gap-2 text-sm text-sidebar-foreground/60">

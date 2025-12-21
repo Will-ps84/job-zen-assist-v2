@@ -108,7 +108,7 @@ export default function BrandSettings() {
                 id="slogan"
                 value={form.slogan}
                 onChange={(e) => setForm({ ...form, slogan: e.target.value })}
-                placeholder="Tu mentor digital para encontrar el trabajo ideal"
+                placeholder="Filtra CVs en minutos con IA explicable"
               />
               <p className="text-xs text-muted-foreground">
                 Se mostrará en el hero de la landing

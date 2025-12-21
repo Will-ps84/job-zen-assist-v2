@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Briefcase, Mail, Lock, User, Eye, EyeOff, Globe, Loader2 } from "lucide-react";
+import { FileStack, Mail, Lock, User, Eye, EyeOff, Globe, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
@@ -118,14 +118,14 @@ export default function Registro() {
       <div className="hidden lg:flex flex-1 items-center justify-center p-8">
         <div className="max-w-lg text-center">
           <div className="w-24 h-24 mx-auto mb-8 rounded-2xl bg-primary-foreground/10 flex items-center justify-center">
-            <Briefcase className="w-12 h-12 text-primary-foreground" />
+            <FileStack className="w-12 h-12 text-primary-foreground" />
           </div>
           <h2 className="font-display text-3xl font-bold text-primary-foreground mb-4">
-            Únete a El Mentor Digital
+            Únete a HR Screener LATAM
           </h2>
           <p className="text-primary-foreground/70 leading-relaxed mb-8">
-            Miles de profesionales en LATAM ya transformaron su búsqueda de
-            empleo. Tu siguiente oportunidad está más cerca de lo que crees.
+            Cientos de reclutadores en LATAM ya transformaron su proceso de
+            selección. Filtra CVs en minutos con IA explicable.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             {paises.map((pais) => (
@@ -145,15 +145,15 @@ export default function Registro() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+              <FileStack className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-lg leading-tight text-primary-foreground">
-                El Mentor
+                HR Screener
               </span>
               <span className="text-xs text-primary-foreground/60 -mt-1">
-                Digital
+                LATAM
               </span>
             </div>
           </Link>
