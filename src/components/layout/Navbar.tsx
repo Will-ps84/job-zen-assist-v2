@@ -5,7 +5,6 @@ import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/#demo", label: "Demo", isAnchor: true },
   { href: "/#como-funciona", label: "Cómo funciona", isAnchor: true },
   { href: "/precios", label: "Precios", isAnchor: false },
   { href: "/#faq", label: "FAQ", isAnchor: true },

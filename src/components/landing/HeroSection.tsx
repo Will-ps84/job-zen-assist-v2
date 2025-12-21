@@ -61,19 +61,14 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up delay-300">
             <Button size="xl" variant="accent" asChild>
               <Link to="/registro">
-                Probar análisis de CVs
+                Crear cuenta gratis
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button
-              size="xl"
-              variant="hero-outline"
-              onClick={() => {
-                const element = document.getElementById('demo');
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Ver demo sin registro
+            <Button size="xl" variant="hero-outline" asChild>
+              <Link to="/login">
+                Iniciar sesión
+              </Link>
             </Button>
           </div>
 
