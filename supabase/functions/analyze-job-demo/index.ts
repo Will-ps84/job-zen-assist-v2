@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // Allowed origins for CORS - production and development
 const ALLOWED_ORIGINS = [
@@ -9,6 +10,11 @@ const ALLOWED_ORIGINS = [
 
 const MAX_JOB_DESC_LENGTH = 20000; // 20KB max for job description
 const MAX_BODY_SIZE = 50000; // 50KB max total body size
+const RATE_LIMIT_MAX_REQUESTS = 5; // Max requests per IP per hour
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+
+// In-memory rate limiting store (resets on function cold start, but provides basic protection)
+const rateLimitStore = new Map<string, { count: number; firstRequest: number }>();
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
   const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : "";
@@ -19,11 +25,70 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
   };
 }
 
+function getClientIP(req: Request): string {
+  // Try various headers that might contain the real IP
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    // x-forwarded-for can contain multiple IPs, take the first one
+    return forwarded.split(",")[0].trim();
+  }
+  const realIP = req.headers.get("x-real-ip");
+  if (realIP) return realIP;
+  const cfConnectingIP = req.headers.get("cf-connecting-ip");
+  if (cfConnectingIP) return cfConnectingIP;
+  // Fallback to a default if no IP found
+  return "unknown";
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+
+  if (!entry) {
+    // First request from this IP
+    rateLimitStore.set(ip, { count: 1, firstRequest: now });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+
+  const elapsed = now - entry.firstRequest;
+  
+  if (elapsed > RATE_LIMIT_WINDOW_MS) {
+    // Window expired, reset
+    rateLimitStore.set(ip, { count: 1, firstRequest: now });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    // Rate limit exceeded
+    const resetIn = RATE_LIMIT_WINDOW_MS - elapsed;
+    return { allowed: false, remaining: 0, resetIn };
+  }
+
+  // Increment count
+  entry.count++;
+  rateLimitStore.set(ip, entry);
+  return { 
+    allowed: true, 
+    remaining: RATE_LIMIT_MAX_REQUESTS - entry.count, 
+    resetIn: RATE_LIMIT_WINDOW_MS - elapsed 
+  };
+}
+
+// Clean up old entries periodically to prevent memory bloat
+function cleanupRateLimitStore() {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitStore.entries()) {
+    if (now - entry.firstRequest > RATE_LIMIT_WINDOW_MS) {
+      rateLimitStore.delete(ip);
+    }
+  }
+}
+
 serve(async (req) => {
   const origin = req.headers.get("origin");
   const corsHeaders = getCorsHeaders(origin);
 
-  // Reject requests from non-allowed origins
+  // Reject requests from non-allowed origins (server-side check, not just CORS)
   if (origin && !ALLOWED_ORIGINS.includes(origin)) {
     console.warn(`Blocked request from unauthorized origin: ${origin}`);
     return new Response(
@@ -36,13 +101,46 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Clean up old rate limit entries
+  cleanupRateLimitStore();
+
+  // Get client IP and check rate limit
+  const clientIP = getClientIP(req);
+  const rateLimit = checkRateLimit(clientIP);
+  
+  // Add rate limit headers
+  const rateLimitHeaders = {
+    "X-RateLimit-Limit": RATE_LIMIT_MAX_REQUESTS.toString(),
+    "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+    "X-RateLimit-Reset": Math.ceil(rateLimit.resetIn / 1000).toString(),
+  };
+
+  if (!rateLimit.allowed) {
+    console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+    return new Response(
+      JSON.stringify({ 
+        error: "Demasiadas solicitudes. Intenta más tarde.",
+        retryAfter: Math.ceil(rateLimit.resetIn / 1000)
+      }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          ...rateLimitHeaders,
+          "Content-Type": "application/json",
+          "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString()
+        } 
+      }
+    );
+  }
+
   try {
     // Check Content-Length header first
     const contentLength = req.headers.get("content-length");
     if (contentLength && parseInt(contentLength) > MAX_BODY_SIZE) {
       return new Response(
         JSON.stringify({ error: "Payload demasiado grande. Máximo 50KB." }),
-        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 413, headers: { ...corsHeaders, ...rateLimitHeaders, "Content-Type": "application/json" } }
       );
     }
 
