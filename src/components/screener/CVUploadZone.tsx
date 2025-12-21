@@ -17,11 +17,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Configure PDF.js worker - use bundled worker for v5.x
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
+// Configure PDF.js worker - use local file from public folder
+pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 interface ExtractedFile {
   name: string;
