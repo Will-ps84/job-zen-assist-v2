@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 // Lazy load - auth pages
 const Login = lazy(() => import("./pages/Login"));
 const Registro = lazy(() => import("./pages/Registro"));
+const Recuperar = lazy(() => import("./pages/Recuperar"));
 const Precios = lazy(() => import("./pages/Precios"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -28,6 +29,7 @@ const Recursos = lazy(() => import("./pages/app/Recursos"));
 const InterviewSimulator = lazy(() => import("./pages/app/InterviewSimulator"));
 const ScreenerFlow = lazy(() => import("./pages/app/ScreenerFlow"));
 const ScreenerHistory = lazy(() => import("./pages/app/ScreenerHistory"));
+const Configuracion = lazy(() => import("./pages/app/Configuracion"));
 
 // Lazy load - admin pages
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -70,6 +72,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
+              <Route path="/recuperar" element={<Recuperar />} />
               <Route path="/precios" element={<Precios />} />
               
               {/* App routes (protected) */}
@@ -85,6 +88,7 @@ const App = () => (
               <Route path="/app/screener/history" element={<ProtectedRoute><ScreenerHistory /></ProtectedRoute>} />
               <Route path="/app/analitica" element={<ProtectedRoute><Analitica /></ProtectedRoute>} />
               <Route path="/app/recursos" element={<ProtectedRoute><Recursos /></ProtectedRoute>} />
+              <Route path="/app/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
               
               {/* Admin routes (protected + role checked in component) */}
               <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
