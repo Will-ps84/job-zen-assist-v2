@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 const Login = lazy(() => import("./pages/Login"));
 const Registro = lazy(() => import("./pages/Registro"));
 const Recuperar = lazy(() => import("./pages/Recuperar"));
+const ActualizarContrasena = lazy(() => import("./pages/ActualizarContrasena"));
 const Precios = lazy(() => import("./pages/Precios"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
               <Route path="/recuperar" element={<Recuperar />} />
+              <Route path="/actualizar-contrasena" element={<ActualizarContrasena />} />
               <Route path="/precios" element={<Precios />} />
               
               {/* App routes (protected) */}
